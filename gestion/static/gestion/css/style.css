@@ -1,0 +1,93 @@
+/* gestion/static/gestion/css/style.css */
+
+/* Estilos generales */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Sidebar (Menú Lateral) */
+.sidebar {
+    min-height: 100vh;
+    background-color: #fff;
+    border-right: 1px solid #dee2e6;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.logo-area {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.logo-img {
+    max-width: 100%;
+    height: auto;
+    max-height: 80px;
+}
+
+.nav-link {
+    color: #555;
+    font-weight: 500;
+    padding: 15px 20px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.nav-link:hover {
+    background-color: #fff3cd; 
+    color: #FFA500;
+}
+
+.nav-link.active {
+    background-color: #f4a51c; 
+    color: white;
+    border-radius: 0 25px 25px 0;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.nav-link i {
+    width: 25px;
+}
+
+/* Contenido principal */
+.main-content {
+    margin-left: 250px; 
+    padding: 30px;
+}
+
+/* Botones bersonalizados */
+.btn-menatics {
+    background-color: #f4a51c;
+    color: white;
+    font-weight: bold;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.btn-menatics:hover {
+    background-color: #e69500;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Tarjetas y formularios */
+.card {
+    border-radius: 10px;
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 2px solid #FFA500;
+}
+
+.form-control:focus {
+    border-color: #f4a51c;
+    box-shadow: 0 0 0 0.2rem rgba(255, 165, 0, 0.25);
+}
