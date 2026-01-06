@@ -20,13 +20,13 @@
             <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'dashboard' %}">
                 <i class="fas fa-calendar-alt"></i> Dashboard
             </a>
-            <a class="nav-link {% if 'clientes' in request.path and 'crear' not in request.path %}active{% endif %}" href="{% url 'lista_clientes' %}">
+            <a class="nav-link {% if 'clientes' in request.path and 'crear' not in request.path %}active{% endif %}" href="#"">
                 <i class="fas fa-user me-2"></i> Clientes
             </a>
-            <a class="nav-link {% if 'proveedores' in request.path %}active{% endif %}" href="{% url 'lista_proveedores' %}">
+            <a class="nav-link {% if 'proveedores' in request.path %}active{% endif %}" href="#">
                 <i class="fas fa-truck"></i> Proveedores
             </a>
-            <a class="nav-link {% if 'productos' in request.path %}active{% endif %}" href="{% url 'lista_productos' %}">
+            <a class="nav-link {% if 'productos' in request.path %}active{% endif %}" href="#">
                 <i class="fas fa-box"></i> Servicios
             </a>
             <a class="nav-link" href="#">
@@ -60,15 +60,7 @@
             </h4>
             
             <div class="d-flex align-items-center">
-                <form class="d-none d-md-flex ms-auto me-3 " action="{% url 'lista_clientes' %}" method="GET">
-                    <div class="input-group me-5 ">
-                        <input type="text" name="q" class="form-control border-2 bg-light" 
-                            placeholder="Buscar cliente por nombres o ruc" aria-label="Search" 
-                            value="{{ request.GET.q }}"> 
-                            <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </form>
+                
                 
                 <div class="d-flex align-items-center">
                     <span class="me-2 fw-bold text-dark">{{ user.get_full_name|default:user.email }}</span>

@@ -45,12 +45,16 @@
                 'driver': 'ODBC Driver 17 for SQL Server', # O la versión de tu driver, si es diferente
             },
         }
-8. Realizar la migracion a la base de datos para comprobar si esta bien configurada la BDD
+9. Realizar la migracion a la base de datos para comprobar si esta bien configurada la BDD
     Ejecutar: python manage.py migrate
     Resultado: OK
-13. Crear una aplicación llamada gestion
+10. Crear una aplicación llamada gestion
     Ejecutar: python manage.py startapp gestion
 
+11. Crear un superadministrador del sistema
+    Ejecutar: python manage.py createsuperuser
+
+    
 PARA EJECUTAR EL PROGRAMA: python manage.py runserver
 SUPERADMINISTRADOR
 User: alexisntn@hotmail.com

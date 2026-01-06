@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'gestion',
 ]
 
 MIDDLEWARE = [
@@ -129,3 +130,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuración para usar Email en el Login
+AUTHENTICATION_BACKENDS = [
+    'menatics.authentication.EmailBackend',  # El archivo que acabamos de crear
+    'django.contrib.auth.backends.ModelBackend', # Respaldo (para el admin por defecto)
+]
+
+# A dónde ir después de loguearse o desloguearse
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'  # Ir al dashboard al entrar
+LOGOUT_REDIRECT_URL = 'login'     # Volver al login al salir
