@@ -5,7 +5,7 @@ from .models import DatosGeneralesCliente, DatosServicio, DatosTecnicosCliente
 class EstiloFormMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.fields.items():
+        for field_name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.update({'class': 'form-check-input'})
             else:
@@ -73,7 +73,7 @@ class ServicioForm(EstiloFormMixin, forms.ModelForm):
             'fecha_vencimiento': forms.DateInput(attrs={'type': 'date', 'readonly': 'readonly'}),
             'fecha_caducidad_firma': forms.DateInput(attrs={'type': 'date'}),
             'facturas_consumidas': forms.NumberInput(attrs={'readonly': 'readonly', 'id': 'id_facturas_consumidas'}),
-            'observaciones': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Detalles del servicio'}),
+            'observaciones': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Escribe aquí los detalles del servicio del cliente (Opcional)'}),
             'precio_pactado': forms.NumberInput(attrs={'step': '0.01', 'placeholder': '0.00'})
         }
 
@@ -83,11 +83,23 @@ class ClienteForm(EstiloFormMixin, forms.ModelForm):
         model = DatosGeneralesCliente
         exclude = ['servicio'] 
         widgets = {
-            'observaciones': forms.Textarea(attrs={'rows': 2}),
+            'observaciones': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Escribe los detalles del estado del cliente (Opcional)'}),
             'envio_email': forms.CheckboxInput(), 
             'contacto_alt': forms.CheckboxInput(),
             'activo': forms.CheckboxInput(),
-            'nombres_cliente': forms.TextInput(attrs={'class': 'text-uppercase'}),
+            # Validar que en el ruc y telefono se escriba solo números 
+            'ruc_cliente': forms.TextInput(attrs={
+                'maxlength': '13', 
+                'minlength': '13',
+                'oninput': "this.value = this.value.replace(/[^0-9]/g, '')",
+                'placeholder': '1700000000001'
+            }),
+            'telefono_cliente': forms.TextInput(attrs={
+                'maxlength': '10',
+                'oninput': "this.value = this.value.replace(/[^0-9]/g, '')",
+                'placeholder': '0999999999'
+            }),
+            'nombres_cliente': forms.TextInput(attrs={'class': 'text-uppercase', 'placeholder': 'Escribe la razón social del cliente'}),
             'direccion': forms.Textarea(attrs={'rows': 2, 'class': 'text-uppercase'}),
             'observacion_alt': forms.Textarea(attrs={'rows': 1, 'class': 'text-uppercase'}),
         }

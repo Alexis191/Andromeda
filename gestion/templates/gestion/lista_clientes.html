@@ -1,6 +1,6 @@
 {% extends 'gestion/base.html' %}
 
-{% block page_title %}Cartera de Clientes{% endblock %}
+{% block page_title %}Cartera de clientes{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -10,6 +10,58 @@
             <a href="{% url 'crear_cliente' %}" class="btn btn-menatics">
                 <i class="fas fa-user-plus me-2"></i> Nuevo Cliente
             </a>
+        </div>
+
+        <div class="card mb-3 border-0 shadow-sm bg-light">
+            <div class="card-body py-3">
+                <form method="GET" class="row g-2 align-items-end">
+                    
+                    <input type="hidden" name="q" value="{{ request.GET.q }}">
+
+                    <div class="col-md-2">
+                        <label class="small fw-bold text-muted">Proveedor</label>
+                        <select name="proveedor" class="form-select">
+                            <option value="">Todos</option>
+                            {% for p in proveedores %}
+                                <option value="{{ p.id }}" {% if request.GET.proveedor == p.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ p.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="small fw-bold text-muted">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="">Todos</option>
+                            {% for e in estados %}
+                                <option value="{{ e.id }}" {% if request.GET.estado == e.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ e.estado }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="small fw-bold text-muted">Vencimiento (Desde - Hasta)</label>
+                        <div class="input-group">
+                            <input type="date" name="fecha_ini" class="form-control" value="{{ request.GET.fecha_ini }}">
+                            <input type="date" name="fecha_fin" class="form-control" value="{{ request.GET.fecha_fin }}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 d-grid gap-2 d-md-block">
+                        <button type="submit" class="btn btn-primary w-100 mb-1" title="Aplicar Filtros">
+                            <i class="fas fa-filter"></i> Filtrar
+                        </button>
+                        {% if params %}
+                            <a href="{% url 'lista_clientes' %}" class="btn btn-outline-secondary btn-sm w-100">
+                                <i class="fas fa-times"></i> Limpiar
+                            </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
         </div>
 
         <div class="card shadow-sm border-0">

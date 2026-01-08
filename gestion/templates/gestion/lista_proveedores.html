@@ -1,5 +1,5 @@
 {% extends 'gestion/base.html' %}
-{% block page_title %}Gestión de Proveedores{% endblock %}
+{% block page_title %}Gestión de proveedores{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-end mb-3">
@@ -55,10 +55,26 @@
             {% csrf_token %}
             <div class="modal-header bg-warning text-white"><h5 class="modal-title fw-bold">Nuevo Proveedor</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <div class="mb-3"><label>Nombre</label><input type="text" name="nombre" class="form-control" required></div>
-                <div class="mb-3"><label>RUC</label><input type="text" maxlength="13" name="ruc" class="form-control" required></div>
-                <div class="mb-3"><label>Dirección</label><input type="text" name="direccion" class="form-control" required></div>
-                <div class="mb-3"><label>Teléfono</label><input type="text" name="telefono" class="form-control" required></div>
+                <div class="mb-3">
+                    <label>Nombre</label>
+                    <input type="text" name="nombre" class="form-control" 
+                        oninput="this.value = this.value.toUpperCase()" required>
+                </div>
+                <div class="mb-3">
+                    <label>RUC</label>
+                    <input type="text" maxlength="13" minlength="13" name="ruc" class="form-control" 
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" required placeholder="13 dígitos numéricos">
+                </div>
+                <div class="mb-3">
+                    <label>Dirección</label>
+                    <input type="text" name="direccion" class="form-control" 
+                        oninput="this.value = this.value.toUpperCase()" required>
+                </div>
+                <div class="mb-3">
+                    <label>Teléfono</label>
+                    <input type="text" maxlength="10" minlength="10" name="telefono" class="form-control" 
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" required placeholder="10 dígitos numéricos">
+                </div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-menatics">Guardar</button></div>
         </form>
@@ -72,10 +88,26 @@
             <input type="hidden" name="id_proveedor" id="edit_id">
             <div class="modal-header bg-primary text-white"><h5 class="modal-title fw-bold">Editar Proveedor</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <div class="mb-3"><label>Nombre</label><input type="text" name="nombre" id="edit_nombre" class="form-control" required></div>
-                <div class="mb-3"><label>RUC</label><input type="text" name="ruc" id="edit_ruc" class="form-control" required></div>
-                <div class="mb-3"><label>Dirección</label><input type="text" name="direccion" id="edit_dir" class="form-control" required></div>
-                <div class="mb-3"><label>Teléfono</label><input type="text" name="telefono" id="edit_tel" class="form-control" required></div>
+                <div class="mb-3">
+                    <label>Nombre</label>
+                    <input type="text" name="nombre" id="edit_nombre" class="form-control" 
+                        oninput="this.value = this.value.toUpperCase()" required>
+                </div>
+                <div class="mb-3">
+                    <label>RUC</label>
+                    <input type="text" name="ruc" id="edit_ruc" maxlength="13" minlength="13" class="form-control" 
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                </div>
+                <div class="mb-3">
+                    <label>Dirección</label>
+                    <input type="text" name="direccion" id="edit_dir" class="form-control" 
+                        oninput="this.value = this.value.toUpperCase()" required>
+                </div>
+                <div class="mb-3">
+                    <label>Teléfono</label>
+                    <input type="text" name="telefono" id="edit_tel" maxlength="10" minlength="10" class="form-control" 
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                </div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Actualizar</button></div>
         </form>

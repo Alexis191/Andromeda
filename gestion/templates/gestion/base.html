@@ -56,18 +56,26 @@
     <div class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
             <h4 class="m-0 fw-bold text-secondary">
-                {% block page_title %}Panel General{% endblock %}
+                {% block page_title %}Panel general{% endblock %}
             </h4>
             
             <div class="d-flex align-items-center">
-                
-                
-                <div class="d-flex align-items-center">
-                    <span class="me-2 fw-bold text-dark">{{ user.get_full_name|default:user.email }}</span>
+                <form class="d-none d-md-flex ms-auto" action="{% url 'lista_clientes' %}" method="GET">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control border-2 bg-light" 
+                            placeholder="Buscar cliente por nombres o ruc" aria-label="Search" 
+                            value="{{ request.GET.q }}" style="min-width: 500px;"> 
+                            <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="d-flex align-items-center">
+                <span class="me-2 fw-bold text-dark">{{ user.get_full_name|default:user.email }}</span>
                     <div class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 40px; height: 40px;">
                         {{ user.email|first|upper }}
                     </div>
-                </div>
             </div>
         </div>
 
