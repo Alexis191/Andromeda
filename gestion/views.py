@@ -18,6 +18,8 @@ from .forms import *
 # Utils y otras bibliotecas
 import json
 import pyodbc
+import openpyxl
+from django.db import IntegrityError
 from datetime import datetime
 
 
@@ -485,3 +487,102 @@ def consultar_facturas_externas(request):
             return JsonResponse({'status': 'error', 'mensaje': f'Error interno del servidor: {str(e)}'})
             
     return JsonResponse({'status': 'error', 'mensaje': 'Método no permitido'})
+
+# ==========================================
+# IMPORTAR DATOS DESDE EXCEL
+# ==========================================
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser, login_url='dashboard')
+def carga_masiva_clientes(request):
+    if request.method == 'POST':
+        form = CargaMasivaForm(request.POST, request.FILES)
+        if form.is_valid():
+            archivo = request.FILES['archivo_excel']
+            wb = openpyxl.load_workbook(archivo)
+            hoja = wb.active
+            
+            exitos = 0
+            errores = []
+
+            for i, fila in enumerate(hoja.iter_rows(min_row=2, values_only=True), start=2):
+                if not any(fila): continue # Salta filas vacías
+
+                # DESEMPAQUETADO EXACTO (36 columnas según la lista de arriba)
+                (
+                    nom, ruc, tel, mail, id_prov, id_est, id_reg, act, env_m, obs_gen,
+                    c_alt, t_alt, m_alt, o_alt,
+                    id_prod, p_pact, f_cre, f_ren, f_ven, f_firm, m_v, m_c, m_t, m_i, obs_serv,
+                    id_srv, bdd, u_port, c_port, n_port, vers, firma, n_serv, mail_t, c_mail_t, cod_mail
+                ) = fila
+
+                try:
+                    with transaction.atomic():
+                        # 1. Crear DatosServicio
+                        servicio = DatosServicio.objects.create(
+                            producto_id=id_prod,
+                            fecha_creacion=f_cre,
+                            fecha_renovacion=f_ren,
+                            fecha_vencimiento=f_ven,
+                            fecha_caducidad_firma=f_firm,
+                            precio_pactado=p_pact,
+                            observaciones=obs_serv,
+                            mod_ventas=bool(m_v),
+                            mod_compras=bool(m_c),
+                            mod_tesoreria=bool(m_t),
+                            mod_inventario=bool(m_i)
+                        )
+
+                        # 2. Crear DatosGeneralesCliente
+                        cliente = DatosGeneralesCliente.objects.create(
+                            servicio=servicio,
+                            nombres_cliente=str(nom).upper(),
+                            ruc_cliente=str(ruc),
+                            telefono_cliente=str(tel),
+                            correo_cliente=str(mail).lower() if mail else "",
+                            proveedor_id=id_prov or 4, # Usa ID 4 si viene vacío
+                            estado_id=id_est or 4,
+                            regimen_id=id_reg or 2,
+                            activo=bool(act),
+                            envio_email=bool(env_m),
+                            observaciones=obs_gen,
+                            contacto_alt=bool(c_alt),
+                            telefono_alt=t_alt,
+                            correo_alt=m_alt,
+                            observacion_alt=o_alt
+                        )
+
+                        # 3. Crear DatosTecnicosCliente
+                        DatosTecnicosCliente.objects.create(
+                            cliente=cliente,
+                            servidor_alojamiento_id=id_srv,
+                            nombre_basedatos=bdd,
+                            url_portal=u_port,
+                            clave_portal=c_port,
+                            num_portal=n_port,
+                            version=vers,
+                            firma=firma,
+                            num_servicios=n_serv,
+                            email_tecnico=mail_t,
+                            clave_email=c_mail_t,
+                            code_email=cod_mail
+                        )
+                        exitos += 1
+                except DatosProducto.DoesNotExist:
+                    errores.append(f"Fila {i}: El ID de Plan {id_prod} no existe.")
+                except IntegrityError:
+                    errores.append(f"Fila {i}: El RUC {ruc} ya está registrado (Violación RD02).")
+                except Exception as e:
+                    errores.append(f"Fila {i}: Error inesperado: {str(e)}")
+
+            if exitos > 0:
+                messages.success(request, f"Se cargaron {exitos} clientes con éxito.")
+            if errores:
+                for err in errores:
+                    messages.error(request, err)
+                    
+            return redirect('lista_clientes')
+    else:
+        form = CargaMasivaForm() 
+    
+    return render(request, 'gestion/carga_masiva.html', {'form': form})

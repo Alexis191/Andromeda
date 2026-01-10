@@ -1,0 +1,28 @@
+{% extends 'gestion/base.html' %}
+{% block page_title %}Importación Masiva{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-menatics text-black">
+                <h5 class="mb-0">Importar clientes desde un archivo Excel</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="alert alert-info small">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Nota:</strong> El sistema validará automáticamente que no existan RUCs duplicados.
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'lista_clientes' %}" class="btn btn-secondary">Volver</a>
+                        <button type="submit" class="btn btn-success">Procesar Archivo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

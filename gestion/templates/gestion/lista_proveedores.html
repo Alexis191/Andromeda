@@ -1,10 +1,10 @@
 {% extends 'gestion/base.html' %}
-{% block page_title %}Gestión de proveedores{% endblock %}
+{% block page_title %}Gestión de distribuidores{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-end mb-3">
     <button class="btn btn-menatics" data-bs-toggle="modal" data-bs-target="#modalCrear">
-        <i class="fas fa-plus me-2"></i> Nuevo Proveedor
+        <i class="fas fa-plus me-2"></i> Nuevo Distribuidor
     </button>
 </div>
 
@@ -37,11 +37,11 @@
                                 <i class="fas fa-edit"></i>
                             </button>
                             <a href="{% url 'eliminar_proveedor' p.pk %}" class="btn btn-sm btn-outline-danger"
-                               onclick="return confirm('¿Eliminar este proveedor?');"><i class="fas fa-trash-alt"></i></a>
+                               onclick="return confirm('¿Eliminar este distribuidor?');"><i class="fas fa-trash-alt"></i></a>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="5" class="text-center py-4 text-muted">No hay proveedores registrados.</td></tr>
+                    <tr><td colspan="5" class="text-center py-4 text-muted">No hay distribuidores registrados.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -53,7 +53,7 @@
     <div class="modal-dialog">
         <form class="modal-content" method="POST" action="{% url 'guardar_proveedor' %}">
             {% csrf_token %}
-            <div class="modal-header bg-warning text-white"><h5 class="modal-title fw-bold">Nuevo Proveedor</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header bg-warning text-white"><h5 class="modal-title fw-bold">Nuevo Distribuidor</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <div class="mb-3">
                     <label>Nombre</label>
@@ -86,7 +86,7 @@
         <form class="modal-content" method="POST" action="{% url 'editar_proveedor' %}">
             {% csrf_token %}
             <input type="hidden" name="id_proveedor" id="edit_id">
-            <div class="modal-header bg-primary text-white"><h5 class="modal-title fw-bold">Editar Proveedor</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header bg-primary text-white"><h5 class="modal-title fw-bold">Editar Distribuidor</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <div class="mb-3">
                     <label>Nombre</label>

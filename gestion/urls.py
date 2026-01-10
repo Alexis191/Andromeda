@@ -36,6 +36,9 @@ urlpatterns = [
     path('proveedores/editar/', views.editar_proveedor, name='editar_proveedor'),
     path('proveedores/eliminar/<int:id>/', views.eliminar_proveedor, name='eliminar_proveedor'), 
 
-    #RUTA DE CONSUMO DE API PARA CONSULTA EXTERNA
+    # RUTA DE CONSUMO DE API PARA CONSULTA EXTERNA
     path('api/consultar-consumo/', views.consultar_facturas_externas, name='api_consultar_consumo'),
+
+    # RUTA PARA IMPORTAR DATOS
+    path('clientes/carga-masiva/', views.carga_masiva_clientes, name='carga_masiva'),
 ]

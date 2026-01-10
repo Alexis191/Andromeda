@@ -138,3 +138,10 @@ class TecnicoForm(EstiloFormMixin, forms.ModelForm):
         exclude = ['cliente'] 
         widgets = {
         }
+
+# FORMULARIO 6: SUBIR ARCHIVO EXCEL PARA IMPORTAR DATOS
+class CargaMasivaForm(forms.Form):
+    archivo_excel = forms.FileField(
+        label="Seleccionar archivo Excel (.xlsx)",
+        help_text="Asegúrese que el archivo tenga el formato correcto"
+    )
