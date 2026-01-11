@@ -683,3 +683,15 @@ def api_eventos_calendario(request):
         })
 
     return JsonResponse(eventos, safe=False)
+
+# VISTA PARA DESUSCRIBIRSE DE CORREOS
+def desuscribir_cliente(request, id_cliente):
+    cliente = get_object_or_404(DatosGeneralesCliente, pk=id_cliente)
+    
+    if request.method == 'GET':
+        # Cambiamos la bandera a False
+        cliente.envio_email = False
+        cliente.save()
+        
+        # Renderizamos una página de confirmación simple
+        return render(request, 'gestion/desuscrito.html', {'cliente': cliente})

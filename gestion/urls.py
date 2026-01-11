@@ -48,4 +48,7 @@ urlpatterns = [
 
     # RUTA PARA EL CALENDARIO EN DASHBOARD
     path('api/eventos-calendario/', views.api_eventos_calendario, name='api_eventos_calendario'),
+
+    # RUTA PARA DESUSCRIPCIÓN AUTOMÁTICA
+    path('desuscribir/<int:id_cliente>/', views.desuscribir_cliente, name='desuscribir_cliente'),
 ]
