@@ -1,9 +1,12 @@
+import logging
 from datetime import datetime
 from .models import DatosGeneralesCliente
 from .services import *
 
+logger = logging.getLogger('gestion_logger')
+
 def tarea_monitoreo_diario():
-    print(f"--- Iniciando Monitoreo Automático: {datetime.now()} ---")
+    logger.info(f"--- Iniciando Monitoreo Automático: {datetime.now()} ---")
     
     # Solo clientes activos que tengan servicio y datos técnicos
     clientes = DatosGeneralesCliente.objects.filter(
@@ -11,7 +14,10 @@ def tarea_monitoreo_diario():
         servicio__isnull=False, 
         datos_tecnicos__isnull=False
     )
-    
+
+    # Contadores para el resumen final
+    exitos = 0
+    errores = 0
     for cliente in clientes:
         try:
             # --- BLOQUE 1: DATOS DE CONEXIÓN ---
@@ -35,18 +41,22 @@ def tarea_monitoreo_diario():
                 cliente.servicio.save(update_fields=['facturas_consumidas'])
                 
                 # 2.2 Verificar Alertas de Consumo (80% / 90%)
-                verificar_alertas_plan(cliente, consumo)
+                alerta_enviada = verificar_alertas_plan(cliente, consumo) # Asumiendo que esta función devuelve True si envió email
                 
-                print(f"✅ {cliente.nombres_cliente}: {consumo} facturas actualizadas.")
+                msg_extra = " | Alerta enviada" if alerta_enviada else ""
+                logger.info(f"CLIENTE: {cliente.nombres_cliente} | ID: {cliente.id} | Consumo: {consumo} facturas{msg_extra}")
+                exitos += 1
             else:
-                print(f"❌ {cliente.nombres_cliente}: Error de conexión SQL (No se pudo contar facturas).")
-
+                logger.warning(f"FALLO CONEXION SQL: {cliente.nombres_cliente} | Host: {srv.ip_host} | DB: {db}")
+                errores += 1
+                
             # --- BLOQUE 3: VENCIMIENTO DE PLAN (NUEVO REQUERIMIENTO) ---
             # Esto se ejecuta INCLUSO si falló la conexión SQL arriba.
             # Es vital que el aviso de fecha se envíe independientemente del estado del servidor del cliente.
             verificar_vencimiento_15_dias(cliente)
                 
         except Exception as e:
-            print(f"Error procesando cliente {cliente.id}: {e}")
+            logger.error(f"ERROR CRITICO Cliente {cliente.nombres_cliente}: {str(e)}", exc_info=True)
+            errores += 1
 
-    print("--- Fin del Monitoreo ---")
+    logger.info(f"--- Fin del Monitoreo. Procesados: {len(clientes)} | Exitos: {exitos} | Errores: {errores} ---")

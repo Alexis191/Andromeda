@@ -116,7 +116,7 @@ def verificar_vencimiento_15_dias(cliente):
         <body style="font-family: Poppins, sans-serif; color: #333; line-height: 1.6;">
             <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
                 <div style="background-color: #f4a51c; padding: 20px; text-align: center;">
-                  <img src="{'gestion/img/logo.svg'}" alt="Menatics Logo" style="height: 60px; width: auto;">
+                  <h2 style="color: white; margin: 0;">CORPORACIÓN MENATICS</h2>
                 </div>
                 
                 <div style="padding: 20px;">

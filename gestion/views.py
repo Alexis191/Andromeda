@@ -151,7 +151,7 @@ def listar_clientes(request):
     page_obj = paginator.get_page(page_number)
     
     proveedores = DatosProveedor.objects.all()
-    estados = DatosServicio.objects.all()
+    estados = EstadoCliente.objects.all()
 
     #CONFIGURACIÓN PARA MANTENER LOS FILTROS AL PAGINAR
     # Creamos un string con los filtros actuales para pegarlo en los botones "Siguiente"

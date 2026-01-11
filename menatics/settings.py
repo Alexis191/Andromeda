@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -135,3 +136,49 @@ OPERATIONS_EMAIL = [
     'alexisntn@hotmail.com',
     #'compañero1@gmail.com',
 ]
+
+LOGS_DIR = BASE_DIR / 'logs'
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        # Handler para registrar TODO (Info, Errores, Warnings) en un archivo que rota cada día
+        'file_automatizacion': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'automatizacion.log'),
+            'when': 'midnight',    # Rota a la medianoche
+            'interval': 1,         # Cada 1 día
+            'backupCount': 30,     # Mantiene solo los últimos 30 archivos (días)
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        # Opcional: Handler para ver los logs en la consola mientras desarrollas
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        # Este logger se usará específicamente en tu app 'gestion'
+        'gestion_logger': {
+            'handlers': ['file_automatizacion', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
