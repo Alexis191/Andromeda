@@ -118,3 +118,17 @@ LOGOUT_REDIRECT_URL = 'login'
 
 # Cierra la sesión automáticamente al cerrar el navegador
 #SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# menatics/settings.py
+
+# Configuración de Correo (Ejemplo para Gmail, cambia según tu proveedor)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com' # O tu servidor SMTP corporativo (ej: outlook.office365.com)
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'collaguazoalexis99@gmail.com'
+EMAIL_HOST_PASSWORD = 'btag wfns bbcj ljmk' # Usa App Password si es Gmail/Outlook
+DEFAULT_FROM_EMAIL = 'Sistema Andrómeda <collaguazoalexis99@gmail.com>'
+
+# Correo del personal operativo que recibirá las alertas
+OPERATIONS_EMAIL = 'alexisntn@hotmail.com'

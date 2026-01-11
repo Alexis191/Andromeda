@@ -6,6 +6,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
+from .services import conectar_y_contar_facturas, verificar_alertas_plan
+
 
 # Django contrib
 from django.contrib import messages
@@ -14,6 +16,7 @@ from django.contrib.auth.models import User
 # Models y forms locales
 from .models import *
 from .forms import *
+from .services import conectar_y_contar_facturas
 
 # Utils y otras bibliotecas
 import json
@@ -398,93 +401,64 @@ def eliminar_proveedor(request, id):
 # API INTERNA PARA CONSULTAR BASES EXTERNAS
 # ==========================================
 
-@csrf_exempt # Usamos csrf_exempt para facilitar la llamada AJAX rápida en el prototipo
+@csrf_exempt
 def consultar_facturas_externas(request):
+    """
+    Vista manual para botón de consulta rápida.
+    Recibe JSON con servidor, BD y fechas arbitrarias.
+    """
     if request.method == 'POST':
         try:
-            # 0. Decodificar JSON
+            # 1. Decodificar JSON
             try:
                 data = json.loads(request.body)
             except json.JSONDecodeError:
-                return JsonResponse({'status': 'error', 'mensaje': 'JSON inválido enviado por el navegador.'})
+                return JsonResponse({'status': 'error', 'mensaje': 'JSON inválido.'})
             
-            # 1. Obtener datos del Request
+            # 2. Obtener datos
             servidor_id = data.get('servidor')
             db_name = data.get('db_name')
-            fecha_inicio_str = data.get('fecha_inicio')
+            fecha_inicio_str = data.get('fecha_inicio') # Viene como YYYY-MM-DD del input date
             fecha_fin_str = data.get('fecha_fin')
 
-            # Validación básica
-            if not servidor_id or not db_name or not fecha_inicio_str:
-                return JsonResponse({'status': 'error', 'mensaje': 'Faltan datos (Servidor, BD o Fechas).'})
+            if not all([servidor_id, db_name, fecha_inicio_str]):
+                return JsonResponse({'status': 'error', 'mensaje': 'Faltan datos requeridos.'})
 
-            # --- 2. CONVERSIÓN DE FECHAS (DD/MM/YYYY) ---
+            # 3. Formatear Fechas para SQL Server (DD/MM/YYYY)
             try:
-                # Convertir de YYYY-MM-DD (Input HTML) a Objeto Fecha
-                fecha_obj_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
-                fecha_obj_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d')
-
-                # Convertir de Objeto Fecha a String DD/MM/YYYY (Formato SQL Server Exigido)
-                fecha_sql_inicio = fecha_obj_inicio.strftime('%d/%m/%Y')
-                fecha_sql_fin = fecha_obj_fin.strftime('%d/%m/%Y')
+                f_obj_ini = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
+                f_obj_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d')
                 
-                print(f"DEBUG: Consultando fechas: {fecha_sql_inicio} y {fecha_sql_fin}")
-
+                fecha_sql_ini = f_obj_ini.strftime('%d/%m/%Y')
+                fecha_sql_fin = f_obj_fin.strftime('%d/%m/%Y')
             except ValueError:
                 return JsonResponse({'status': 'error', 'mensaje': 'Formato de fecha inválido.'})
 
-            # --- 3. BUSCAR CREDENCIALES DEL SERVIDOR ---
+            # 4. Obtener credenciales del servidor
             try:
                 servidor_obj = ServidorBaseDatos.objects.get(pk=servidor_id)
             except ServidorBaseDatos.DoesNotExist:
-                return JsonResponse({'status': 'error', 'mensaje': 'Servidor no encontrado en catálogo.'})
+                return JsonResponse({'status': 'error', 'mensaje': 'Servidor no encontrado.'})
 
-            # --- 4. CONECTAR A LA BASE EXTERNA ---
-            conn_str = (
-                f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                f'SERVER={servidor_obj.ip_host},{servidor_obj.puerto};'
-                f'DATABASE={db_name};'
-                f'UID={servidor_obj.usuario_sql};'
-                f'PWD={servidor_obj.clave_sql};'
-                'TrustServerCertificate=yes;'
-                'Connection Timeout=5;'
+            # 5. Usar el Servicio Centralizado (Reutilización de código)
+            cantidad = conectar_y_contar_facturas(
+                ip=servidor_obj.ip_host,
+                puerto=servidor_obj.puerto,
+                db=db_name,
+                user=servidor_obj.usuario_sql,
+                password=servidor_obj.clave_sql,
+                fecha_ini_str=fecha_sql_ini,
+                fecha_fin_str=fecha_sql_fin
             )
 
-            print(f"DEBUG: Conectando a {servidor_obj.ip_host} -> {db_name}...")
-            
-            # --- MANEJO DE ERROR DE CONEXIÓN ESPECÍFICO ---
-            try:
-                conn = pyodbc.connect(conn_str)
-            except Exception as e:
-                print(f"ERROR CONEXIÓN: {e}")
-                return JsonResponse({'status': 'error', 'mensaje': 'No se pudo conectar al SQL Server remoto. Revisa IP/Usuario.'})
-
-            cursor = conn.cursor()
-            
-            # --- 5. EJECUTAR CONSULTA ---
-            query = """
-                SELECT COUNT(*) AS TotalDocumentos
-                FROM FacElec_Documentos
-                WHERE FechaEmision >= ? AND FechaEmision < ?
-            """
-            
-            try:
-                # Pasamos las fechas YA FORMATEADAS como strings "23/12/2024"
-                cursor.execute(query, (fecha_sql_inicio, fecha_sql_fin))
-                row = cursor.fetchone()
-                cantidad = row[0] if row else 0
-            except Exception as e:
-                print(f"ERROR QUERY: {e}")
-                return JsonResponse({'status': 'error', 'mensaje': f'Error al leer tabla FacElec_Documentos: {str(e)}'})
-            
-            conn.close()
-            
-            return JsonResponse({'status': 'ok', 'cantidad': cantidad})
+            if cantidad is not None:
+                return JsonResponse({'status': 'ok', 'cantidad': cantidad})
+            else:
+                return JsonResponse({'status': 'error', 'mensaje': 'Error al conectar con la base de datos externa.'})
 
         except Exception as e:
-            # Captura cualquier otro error de Python (sintaxis, variables no definidas)
-            print(f"ERROR CRÍTICO: {e}") 
-            return JsonResponse({'status': 'error', 'mensaje': f'Error interno del servidor: {str(e)}'})
+            print(f"ERROR CRÍTICO EN VISTA: {e}")
+            return JsonResponse({'status': 'error', 'mensaje': f'Error interno: {str(e)}'})
             
     return JsonResponse({'status': 'error', 'mensaje': 'Método no permitido'})
 
@@ -605,3 +579,57 @@ def carga_masiva_clientes(request):
         form = CargaMasivaForm() 
     
     return render(request, 'gestion/carga_masiva.html', {'form': form})
+
+@login_required
+def api_obtener_ids_clientes(request):
+    """Retorna lista de IDs de clientes activos para iterar en el frontend"""
+    # Filtramos clientes que tengan datos técnicos y servicio configurado
+    ids = list(DatosGeneralesCliente.objects.filter(
+        activo=True,
+        datos_tecnicos__isnull=False,
+        servicio__isnull=False
+    ).values_list('id', flat=True))
+    
+    return JsonResponse({'ids': ids})
+
+@login_required
+def api_sincronizar_cliente(request, id_cliente):
+    """Procesa un solo cliente (se llama vía AJAX)"""
+    try:
+        cliente = DatosGeneralesCliente.objects.get(pk=id_cliente)
+        
+        # 1. Datos para conexión
+        srv = cliente.datos_tecnicos.servidor_alojamiento
+        db = cliente.datos_tecnicos.nombre_basedatos
+        f_ini = cliente.servicio.fecha_renovacion.strftime('%d/%m/%Y')
+        f_fin = cliente.servicio.fecha_vencimiento.strftime('%d/%m/%Y')
+
+        # 2. Llamada al servicio (reutilizando tu lógica central)
+        cantidad = conectar_y_contar_facturas(
+            srv.ip_host, srv.puerto, db, 
+            srv.usuario_sql, srv.clave_sql, 
+            f_ini, f_fin
+        )
+
+        if cantidad is not None:
+            # 3. Guardar en BD
+            cliente.servicio.facturas_consumidas = cantidad
+            cliente.servicio.save(update_fields=['facturas_consumidas'])
+            
+            # 4. Verificar Alertas
+            verificar_alertas_plan(cliente, cantidad)
+            
+            return JsonResponse({
+                'status': 'ok', 
+                'cliente': cliente.nombres_cliente, 
+                'cantidad': cantidad
+            })
+        else:
+            return JsonResponse({
+                'status': 'error', 
+                'cliente': cliente.nombres_cliente, 
+                'mensaje': 'Error de conexión'
+            })
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'mensaje': str(e)})

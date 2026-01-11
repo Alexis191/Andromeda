@@ -41,4 +41,8 @@ urlpatterns = [
 
     # RUTA PARA IMPORTAR DATOS
     path('carga-masiva/', views.carga_masiva_clientes, name='carga_masiva'),
+
+    # RUTA PARA CONSULTAR CONSUMO DE CLIENTES
+    path('api/get-clientes-ids/', views.api_obtener_ids_clientes, name='api_get_ids'),
+    path('api/sync-cliente/<int:id_cliente>/', views.api_sincronizar_cliente, name='api_sync_cliente'),
 ]

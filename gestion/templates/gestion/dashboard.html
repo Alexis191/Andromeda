@@ -15,6 +15,33 @@
             <i class="fas fa-plus-circle me-2"></i> Reportes
         </a>
     </div>
+
+    <button type="button" class="btn btn-primary" onclick="iniciarSincronizacionMasiva()">
+        <i class="fas fa-sync-alt"></i> Actualizar Todo
+    </button>
+
+    <div class="modal fade" id="modalSincronizacion" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-cloud-download-alt me-2"></i> Actualizando Consumos</h5>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-1 text-muted" id="syncStatusText">Iniciando conexión...</p>
+                    <div class="progress mb-3" style="height: 25px;">
+                        <div id="syncProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 0%;">0%</div>
+                    </div>
+                    
+                    <div id="syncLogs" class="border rounded p-2 bg-light" style="height: 200px; overflow-y: auto; font-size: 0.85rem;">
+                        <span class="text-muted fst-italic">Esperando inicio del proceso...</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btnCloseSync" data-bs-dismiss="modal" disabled>Cerrar y Recargar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="card shadow-sm border-0">
@@ -24,4 +51,112 @@
         <p>Próximamente implementaremos el calendario completo.</p>
     </div>
 </div>
+
+<script>
+    async function iniciarSincronizacionMasiva() {
+        const statusText = document.getElementById('syncStatusText');
+        const progressBar = document.getElementById('syncProgressBar');
+        const logsDiv = document.getElementById('syncLogs');
+        const btnClose = document.getElementById('btnCloseSync');
+        
+        // Inicializar modal
+        const modalElement = document.getElementById('modalSincronizacion');
+        const myModal = new bootstrap.Modal(modalElement);
+        
+        progressBar.style.width = '0%';
+        progressBar.innerText = '0%';
+        logsDiv.innerHTML = ''; 
+        btnClose.disabled = true;
+        statusText.innerText = "Obteniendo lista de clientes...";
+        
+        myModal.show();
+        
+        try {
+            // 1. Obtener IDs usando la URL generada por Django
+            const urlGetIds = "{% url 'api_get_ids' %}"; // Django genera la ruta correcta automáticamente
+            const response = await fetch(urlGetIds);
+            
+            if (!response.ok) throw new Error("Error " + response.status + " al contactar al servidor.");
+            
+            const data = await response.json();
+            const ids = data.ids;
+            
+            if (!ids || ids.length === 0) {
+                statusText.innerText = "No hay clientes activos para actualizar.";
+                logsDiv.innerHTML = '<div class="text-warning p-2">No se encontraron clientes activos con datos técnicos configurados.</div>';
+                btnClose.disabled = false;
+                return;
+            }
+
+            statusText.innerText = `Procesando ${ids.length} clientes...`;
+
+            // 2. Iterar clientes
+            let procesados = 0;
+            let errores = 0;
+
+            // URL base para sincronización (usamos un ID '0' temporal para que Django genere la ruta)
+            const urlBaseSync = "{% url 'api_sync_cliente' 0 %}".replace('/0/', '/');
+
+            for (const id of ids) {
+                const porcentaje = Math.round((procesados / ids.length) * 100);
+                progressBar.style.width = porcentaje + '%';
+                progressBar.innerText = porcentaje + '%';
+                
+                try {
+                    // Concatenamos el ID real a la URL base
+                    const respCliente = await fetch(urlBaseSync + id + '/');
+                    const datoCliente = await respCliente.json();
+                    
+                    const p = document.createElement('div');
+                    p.style.marginBottom = "4px";
+                    p.style.borderBottom = "1px solid #eee";
+                    
+                    if (datoCliente.status === 'ok') {
+                        p.innerHTML = `<i class="fas fa-check text-success me-2"></i><strong>${datoCliente.cliente}</strong>: ${datoCliente.cantidad} docs`;
+                    } else {
+                        const errorMsg = datoCliente.cliente ? 
+                                       `<strong>${datoCliente.cliente}</strong>: ${datoCliente.mensaje}` : 
+                                       `ID ${id}: ${datoCliente.mensaje}`;
+                        p.innerHTML = `<i class="fas fa-times text-danger me-2"></i>${errorMsg}`;
+                        errores++;
+                    }
+                    logsDiv.appendChild(p);
+                    
+                } catch (err) {
+                    console.error(err);
+                    logsDiv.innerHTML += `<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> Fallo de red (ID ${id})</div>`;
+                    errores++;
+                }
+
+                logsDiv.scrollTop = logsDiv.scrollHeight;
+                procesados++;
+            }
+
+            // 3. Finalizar
+            progressBar.style.width = '100%';
+            progressBar.innerText = '100%';
+            progressBar.classList.remove('bg-info', 'progress-bar-striped', 'progress-bar-animated');
+            
+            if (errores === 0) {
+                progressBar.classList.add('bg-success');
+                statusText.innerHTML = `<i class="fas fa-check-circle text-success"></i> Proceso completado con éxito.`;
+            } else {
+                progressBar.classList.add('bg-warning');
+                statusText.innerHTML = `<i class="fas fa-exclamation-circle text-warning"></i> Completado con ${errores} errores.`;
+            }
+            
+            btnClose.disabled = false;
+            
+            btnClose.onclick = function() {
+                location.reload();
+            };
+
+        } catch (error) {
+            statusText.innerText = "Error crítico.";
+            logsDiv.innerHTML += `<div class="text-danger fw-bold p-2">Error: ${error.message}</div>`;
+            console.error(error);
+            btnClose.disabled = false;
+        }
+    }
+</script>
 {% endblock %}
