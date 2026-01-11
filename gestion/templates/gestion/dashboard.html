@@ -4,20 +4,17 @@
 
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 <style>
-    /* Personalización del Calendario */
     #calendar {
         max-width: 100%;
         margin: 0 auto;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* Color distintivo para el día actual */
     .fc-day-today {
-        background-color: #e8f4ff !important; /* Azul muy clarito */
+        background-color: #e8f4ff !important; 
         border: 2px solid #0d6efd !important;
     }
 
-    /* Estilo de los eventos */
     .fc-event {
         cursor: pointer;
         border: none;
@@ -31,7 +28,6 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     
-    /* Quitar subrayado de los links del evento */
     .fc-event a {
         color: white; 
         text-decoration: none;
@@ -53,7 +49,7 @@
         </a>
     </div>
 
-    <button type="button" class="btn btn-primary" onclick="iniciarSincronizacionMasiva()">
+    <button type="button" class="btn btn-menatics " onclick="iniciarSincronizacionMasiva()">
         <i class="fas fa-sync-alt"></i> Actualizar Todo
     </button>
 
@@ -100,28 +96,26 @@
         
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            locale: 'es', // Idioma español
+            locale: 'es', 
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'dayGridMonth,listMonth' // Vista mes y vista lista
+                right: 'dayGridMonth,listMonth'
             },
             buttonText: {
                 today:    'Hoy',
                 month:    'Mes',
                 list:     'Lista'
             },
-            events: "{% url 'api_eventos_calendario' %}", // Conectamos con tu API
+            events: "{% url 'api_eventos_calendario' %}", 
             
             eventClick: function(info) {
-                // Al hacer clic, redirigir (evita comportamiento por defecto si hay url)
                 if (info.event.url) {
                     window.location.href = info.event.url;
-                    info.jsEvent.preventDefault(); // Evita que abra en nueva pestaña si no quieres
+                    info.jsEvent.preventDefault();
                 }
             },
             
-            // Tooltip simple al pasar el mouse (opcional)
             eventDidMount: function(info) {
                 info.el.title = "Estado: " + info.event.extendedProps.estado + "\nCliente: " + info.event.title;
             }
@@ -129,16 +123,12 @@
 
         calendar.render();
 
-        // Funcionalidad del Botón "Actualizar Calendario"
         document.getElementById('btnRefetchCalendar').addEventListener('click', function() {
-            // Animación de carga en el botón
             var icon = this.querySelector('i');
             icon.classList.add('fa-spin');
             
-            // Recargar eventos
             calendar.refetchEvents();
             
-            // Quitar animación después de 1 segundo (simulado)
             setTimeout(function() {
                 icon.classList.remove('fa-spin');
             }, 1000);

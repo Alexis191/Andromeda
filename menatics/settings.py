@@ -131,4 +131,7 @@ EMAIL_HOST_PASSWORD = 'btag wfns bbcj ljmk' # Usa App Password si es Gmail/Outlo
 DEFAULT_FROM_EMAIL = 'Sistema Andrómeda <collaguazoalexis99@gmail.com>'
 
 # Correo del personal operativo que recibirá las alertas
-OPERATIONS_EMAIL = 'alexisntn@hotmail.com'
+OPERATIONS_EMAIL = [
+    'alexisntn@hotmail.com',
+    #'compañero1@gmail.com',
+]

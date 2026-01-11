@@ -1,14 +1,9 @@
-# gestion/services.py
 import pyodbc
 from datetime import datetime
 from django.conf import settings
 from django.core.mail import send_mail
 
 def conectar_y_contar_facturas(ip, puerto, db, user, password, fecha_ini_str, fecha_fin_str):
-    """
-    Conecta a SQL Server y cuenta facturas.
-    Fechas deben venir en formato 'dd/mm/yyyy'.
-    """
     conn_str = (
         f'DRIVER={{ODBC Driver 17 for SQL Server}};'
         f'SERVER={ip},{puerto};'
@@ -27,8 +22,6 @@ def conectar_y_contar_facturas(ip, puerto, db, user, password, fecha_ini_str, fe
                 FROM FacElec_Documentos 
                 WHERE FechaEmision >= ? AND FechaEmision < ?
             """
-            # SQL Server requiere formato dd/mm/yyyy a veces, o parámetros directos.
-            # Pasamos los strings formateados.
             cursor.execute(query, (fecha_ini_str, fecha_fin_str))
             row = cursor.fetchone()
             return row[0] if row else 0
@@ -71,13 +64,12 @@ def verificar_alertas_plan(cliente, consumo_actual):
             "Acción requerida: Contactar al cliente para ampliación de plan."
         )
         
-        # Enviar correo al personal operativo
         try:
             send_mail(
                 asunto,
                 mensaje,
                 settings.DEFAULT_FROM_EMAIL,
-                [settings.OPERATIONS_EMAIL], # Definir esto en settings.py
+                settings.OPERATIONS_EMAIL, 
                 fail_silently=False,
             )
             print(f"Correo enviado para {cliente.nombres_cliente} ({tipo_alerta})")

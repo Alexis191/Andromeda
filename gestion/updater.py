@@ -1,4 +1,3 @@
-# gestion/updater.py
 from apscheduler.schedulers.background import BackgroundScheduler
 from .tasks import tarea_monitoreo_diario
 

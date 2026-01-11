@@ -594,17 +594,14 @@ def api_obtener_ids_clientes(request):
 
 @login_required
 def api_sincronizar_cliente(request, id_cliente):
-    """Procesa un solo cliente (se llama vía AJAX)"""
     try:
         cliente = DatosGeneralesCliente.objects.get(pk=id_cliente)
         
-        # 1. Datos para conexión
         srv = cliente.datos_tecnicos.servidor_alojamiento
         db = cliente.datos_tecnicos.nombre_basedatos
         f_ini = cliente.servicio.fecha_renovacion.strftime('%d/%m/%Y')
         f_fin = cliente.servicio.fecha_vencimiento.strftime('%d/%m/%Y')
 
-        # 2. Llamada al servicio (reutilizando tu lógica central)
         cantidad = conectar_y_contar_facturas(
             srv.ip_host, srv.puerto, db, 
             srv.usuario_sql, srv.clave_sql, 
@@ -612,11 +609,8 @@ def api_sincronizar_cliente(request, id_cliente):
         )
 
         if cantidad is not None:
-            # 3. Guardar en BD
             cliente.servicio.facturas_consumidas = cantidad
             cliente.servicio.save(update_fields=['facturas_consumidas'])
-            
-            # 4. Verificar Alertas
             verificar_alertas_plan(cliente, cantidad)
             
             return JsonResponse({
@@ -634,16 +628,11 @@ def api_sincronizar_cliente(request, id_cliente):
     except Exception as e:
         return JsonResponse({'status': 'error', 'mensaje': str(e)})
     
-
-# gestion/views.py
-
 @login_required
 def api_eventos_calendario(request):
-    # 1. Obtenemos las fechas (Corrección del error 500)
     start_param = request.GET.get('start')
     end_param = request.GET.get('end')
 
-    # Limpiamos el formato de fecha (quitamos la hora 'T...')
     if start_param:
         start = start_param.split('T')[0]
     else:
@@ -654,7 +643,6 @@ def api_eventos_calendario(request):
     else:
         end = None
     
-    # 2. Filtramos los clientes
     if not start or not end:
         return JsonResponse([], safe=False)
 
@@ -669,33 +657,28 @@ def api_eventos_calendario(request):
         if not c.servicio.fecha_vencimiento:
             continue
             
-        # Nombre corto (1 Nombre 1 Apellido)
         partes_nombre = c.nombres_cliente.split()
         if len(partes_nombre) >= 2:
             titulo = f"{partes_nombre[0]} {partes_nombre[1]}"
         else:
             titulo = c.nombres_cliente
 
-        # 3. Lógica de Colores MEJORADA
-        # Convertimos a minúsculas para evitar errores (lower())
         nombre_estado = c.estado.estado.lower().strip() if c.estado else ""
         
-        # Color por defecto (Amarillo/Warning)
         color = "#ffc107" 
         
         if "pendiente" in nombre_estado:
-            color = "#f4a51c" # Rojo (Danger) - Prioridad alta
+            color = "#f4a51c" 
         elif "activo" in nombre_estado or "renovado" or "nuevo" in nombre_estado:
-            color = "#28a745" # Verde (Success)
+            color = "#28a745" 
             
-        # Creamos el evento
         eventos.append({
             'title': titulo,
             'start': c.servicio.fecha_vencimiento.strftime('%Y-%m-%d'),
             'color': color,
             'url': f"/clientes/editar/{c.id}/",
             'extendedProps': {
-                'estado': c.estado.estado # Texto original para mostrar al usuario
+                'estado': c.estado.estado
             }
         })
 
