@@ -108,7 +108,7 @@ class DatosTecnicosCliente(models.Model):
     nombre_basedatos = models.CharField(max_length=100, help_text="Nombre de la BD en SQL Server")
 
     # Datos del Portal Web
-    url_portal = models.URLField(max_length=200, blank=True, null=True)
+    url_portal = models.CharField(max_length=200, blank=True, null=True)
     clave_portal = models.CharField(max_length=100, blank=True, null=True)
     num_portal = models.IntegerField(null=True, blank=True)
     

@@ -345,7 +345,7 @@ def eliminar_producto(request, id):
 # VISTA PROVEEDORES 1: LISTAR PROVEEDORES
 @login_required
 def listar_proveedores(request):
-    proveedores = DatosProveedor.objects.all().order_by('id')
+    proveedores = DatosProveedor.objects.all().order_by('nombre')
     return render(request, 'gestion/lista_proveedores.html', {'proveedores': proveedores})
 
 # VISTA PROVEEDORES 2: CREAR PROVEEDORES
@@ -527,10 +527,10 @@ def carga_masiva_clientes(request):
                             fecha_caducidad_firma=f_firm,
                             precio_pactado=p_pact,
                             observaciones=obs_serv,
-                            mod_ventas=bool(m_v),
-                            mod_compras=bool(m_c),
-                            mod_tesoreria=bool(m_t),
-                            mod_inventario=bool(m_i)
+                            mod_ventas=bool(m_v) or 1,
+                            mod_compras=bool(m_c) or 0,
+                            mod_tesoreria=bool(m_t) or 0,
+                            mod_inventario=bool(m_i) or 0
                         )
 
                         # 2. Crear DatosGeneralesCliente
@@ -570,10 +570,13 @@ def carga_masiva_clientes(request):
                         exitos += 1
                 except DatosProducto.DoesNotExist:
                     errores.append(f"Fila {i}: El ID de Plan {id_prod} no existe.")
+                    continue
                 except IntegrityError:
-                    errores.append(f"Fila {i}: El RUC {ruc} ya está registrado (Violación RD02).")
+                    errores.append(f"Fila {i}: El RUC {ruc} ya está registrado.")
+                    continue
                 except Exception as e:
                     errores.append(f"Fila {i}: Error inesperado: {str(e)}")
+                    continue
 
             if exitos > 0:
                 messages.success(request, f"Se cargaron {exitos} clientes con éxito.")

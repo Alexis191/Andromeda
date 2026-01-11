@@ -58,8 +58,8 @@ DATABASES = {
         'NAME': 'Andromeda',
         'USER': 'sa',           # <-- Cambia esto por tu usuario de SQL Server
         'PASSWORD': '1q2w3eMenatics',    # <-- Cambia esto por tu contraseña de SQL Server
-        'HOST': 'ALEXIS\INFORMATICS',              # O la IP de tu servidor SQL (ej. '127.0.0.1')
-        'PORT': '',                       # Usualmente vacío, o '1433' si tienes un puerto específico
+        'HOST': '192.168.1.46',              # O la IP de tu servidor SQL (ej. '127.0.0.1')
+        'PORT': '1433',                       # Usualmente vacío, o '1433' si tienes un puerto específico
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server', # O la versión de tu driver, si es diferente
         },

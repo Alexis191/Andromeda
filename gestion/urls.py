@@ -40,5 +40,5 @@ urlpatterns = [
     path('api/consultar-consumo/', views.consultar_facturas_externas, name='api_consultar_consumo'),
 
     # RUTA PARA IMPORTAR DATOS
-    path('clientes/carga-masiva/', views.carga_masiva_clientes, name='carga_masiva'),
+    path('carga-masiva/', views.carga_masiva_clientes, name='carga_masiva'),
 ]

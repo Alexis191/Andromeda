@@ -37,12 +37,16 @@
             </a>
 
             {% if user.is_superuser %}
-                <div class="border-top my-2 mx-3"></div> <a class="nav-link text-dark {% if 'usuarios' in request.path %}active{% endif %}" href="{% url 'listar_usuarios' %}">
-                    <i class="fas fa-users-cog text-danger"></i> Gestión Usuarios
+                <div class="border-top my-2 mx-3"></div> 
+                <a class="nav-link {% if 'usuarios' in request.path %}active{% endif %}" href="{% url 'listar_usuarios' %}">
+                    <i class="fas fa-users-cog"></i> Gestión Usuarios
+                </a>
+                <a class="nav-link {% if 'carga-masiva' in request.path %}active{% endif %}" href="{% url 'carga_masiva' %}">
+                    <i class="fas fa-file-import"></i> Importar Datos (Excel)
                 </a>
             {% endif %}
             
-            <div class="mt-auto p-3">
+            <div class="mt-auto">
                 <form action="{% url 'logout' %}" method="POST" id="logout-form" style="display: none;">
                     {% csrf_token %}
                 </form>
