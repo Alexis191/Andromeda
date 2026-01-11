@@ -503,12 +503,12 @@ def carga_masiva_clientes(request):
             hoja = wb.active
             
             exitos = 0
+            omitidos = 0  # Contador para los clientes saltados
             errores = []
 
             for i, fila in enumerate(hoja.iter_rows(min_row=2, values_only=True), start=2):
-                if not any(fila): continue # Salta filas vacías
+                if not any(fila): continue 
 
-                # DESEMPAQUETADO EXACTO (36 columnas según la lista de arriba)
                 (
                     nom, ruc, tel, mail, id_prov, id_est, id_reg, act, env_m, obs_gen,
                     c_alt, t_alt, m_alt, o_alt,
@@ -516,9 +516,18 @@ def carga_masiva_clientes(request):
                     id_srv, bdd, u_port, c_port, n_port, vers, firma, n_serv, mail_t, c_mail_t, cod_mail
                 ) = fila
 
+                # 1. LIMPIEZA DE DATOS (Crucial para evitar errores por espacios invisibles)
+                ruc_limpio = str(ruc).strip()
+                nombre_limpio = str(nom).strip().upper()
+                
+                # 2. VERIFICACIÓN PREVIA: Si el RUC ya existe, saltamos al siguiente
+                if DatosGeneralesCliente.objects.filter(ruc_cliente=ruc_limpio).exists():
+                    omitidos += 1
+                    continue # Omite este ciclo y pasa a la siguiente fila del Excel
+
                 try:
                     with transaction.atomic():
-                        # 1. Crear DatosServicio
+                        # Crear DatosServicio
                         servicio = DatosServicio.objects.create(
                             producto_id=id_prod,
                             fecha_creacion=f_cre,
@@ -533,14 +542,14 @@ def carga_masiva_clientes(request):
                             mod_inventario=bool(m_i) or 0
                         )
 
-                        # 2. Crear DatosGeneralesCliente
+                        # Crear DatosGeneralesCliente (Usando los datos limpios)
                         cliente = DatosGeneralesCliente.objects.create(
                             servicio=servicio,
-                            nombres_cliente=str(nom).upper(),
-                            ruc_cliente=str(ruc),
-                            telefono_cliente=str(tel),
-                            correo_cliente=str(mail).lower() if mail else "",
-                            proveedor_id=id_prov or 4, # Usa ID 4 si viene vacío
+                            nombres_cliente=nombre_limpio,
+                            ruc_cliente=ruc_limpio,  # Usamos el RUC sin espacios
+                            telefono_cliente=str(tel).strip(),
+                            correo_cliente=str(mail).strip().lower() if mail else "",
+                            proveedor_id=id_prov or 4,
                             estado_id=id_est or 4,
                             regimen_id=id_reg or 2,
                             activo=bool(act),
@@ -552,7 +561,7 @@ def carga_masiva_clientes(request):
                             observacion_alt=o_alt
                         )
 
-                        # 3. Crear DatosTecnicosCliente
+                        # Crear DatosTecnicosCliente
                         DatosTecnicosCliente.objects.create(
                             cliente=cliente,
                             servidor_alojamiento_id=id_srv,
@@ -568,18 +577,25 @@ def carga_masiva_clientes(request):
                             code_email=cod_mail
                         )
                         exitos += 1
+                
                 except DatosProducto.DoesNotExist:
                     errores.append(f"Fila {i}: El ID de Plan {id_prod} no existe.")
                     continue
-                except IntegrityError:
-                    errores.append(f"Fila {i}: El RUC {ruc} ya está registrado.")
+                # Ya no necesitamos el IntegrityError para RUCs porque lo filtramos antes,
+                # pero lo dejamos por seguridad para otros campos únicos si existieran.
+                except IntegrityError as e:
+                    errores.append(f"Fila {i}: Error de integridad (posible duplicado no detectado): {str(e)}")
                     continue
                 except Exception as e:
                     errores.append(f"Fila {i}: Error inesperado: {str(e)}")
                     continue
 
+            # Mensajes finales al usuario
             if exitos > 0:
-                messages.success(request, f"Se cargaron {exitos} clientes con éxito.")
+                messages.success(request, f"Proceso finalizado. Cargados: {exitos}. Omitidos (Repetidos): {omitidos}.")
+            elif omitidos > 0:
+                messages.warning(request, f"No se cargaron nuevos clientes. {omitidos} registros ya existían.")
+            
             if errores:
                 for err in errores:
                     messages.error(request, err)
