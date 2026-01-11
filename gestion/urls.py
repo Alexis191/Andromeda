@@ -45,4 +45,7 @@ urlpatterns = [
     # RUTA PARA CONSULTAR CONSUMO DE CLIENTES
     path('api/get-clientes-ids/', views.api_obtener_ids_clientes, name='api_get_ids'),
     path('api/sync-cliente/<int:id_cliente>/', views.api_sincronizar_cliente, name='api_sync_cliente'),
+
+    # RUTA PARA EL CALENDARIO EN DASHBOARD
+    path('api/eventos-calendario/', views.api_eventos_calendario, name='api_eventos_calendario'),
 ]

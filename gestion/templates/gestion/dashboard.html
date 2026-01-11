@@ -1,6 +1,43 @@
 {% extends 'gestion/base.html' %}
 
 {% block content %}
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<style>
+    /* Personalización del Calendario */
+    #calendar {
+        max-width: 100%;
+        margin: 0 auto;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Color distintivo para el día actual */
+    .fc-day-today {
+        background-color: #e8f4ff !important; /* Azul muy clarito */
+        border: 2px solid #0d6efd !important;
+    }
+
+    /* Estilo de los eventos */
+    .fc-event {
+        cursor: pointer;
+        border: none;
+        padding: 2px;
+        font-size: 0.85em;
+        transition: transform 0.2s;
+    }
+    .fc-event:hover {
+        transform: scale(1.05);
+        z-index: 100;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    /* Quitar subrayado de los links del evento */
+    .fc-event a {
+        color: white; 
+        text-decoration: none;
+    }
+</style>
+
 <div class="d-flex justify-content-start align-items-center mb-4 gap-3">
     <div class="btn-group">
         <a href="{% url 'crear_cliente' %}" class="btn btn-menatics text-white fw-bold">
@@ -44,13 +81,70 @@
     </div>
 </div>
 
-<div class="card shadow-sm border-0">
-    <div class="card-body p-5 text-center text-muted">
-        <i class="fas fa-calendar-alt fa-3x mb-3"></i>
-        <h4>Aquí irá el Calendario de Vencimientos</h4>
-        <p>Próximamente implementaremos el calendario completo.</p>
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0 text-secondary"><i class="fas fa-calendar-alt me-2"></i>Calendario de Vencimientos</h5>
+        
+        <button id="btnRefetchCalendar" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-sync-alt me-1"></i> Actualizar Calendario
+        </button>
+    </div>
+    <div class="card-body p-3">
+        <div id='calendar'></div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'es', // Idioma español
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,listMonth' // Vista mes y vista lista
+            },
+            buttonText: {
+                today:    'Hoy',
+                month:    'Mes',
+                list:     'Lista'
+            },
+            events: "{% url 'api_eventos_calendario' %}", // Conectamos con tu API
+            
+            eventClick: function(info) {
+                // Al hacer clic, redirigir (evita comportamiento por defecto si hay url)
+                if (info.event.url) {
+                    window.location.href = info.event.url;
+                    info.jsEvent.preventDefault(); // Evita que abra en nueva pestaña si no quieres
+                }
+            },
+            
+            // Tooltip simple al pasar el mouse (opcional)
+            eventDidMount: function(info) {
+                info.el.title = "Estado: " + info.event.extendedProps.estado + "\nCliente: " + info.event.title;
+            }
+        });
+
+        calendar.render();
+
+        // Funcionalidad del Botón "Actualizar Calendario"
+        document.getElementById('btnRefetchCalendar').addEventListener('click', function() {
+            // Animación de carga en el botón
+            var icon = this.querySelector('i');
+            icon.classList.add('fa-spin');
+            
+            // Recargar eventos
+            calendar.refetchEvents();
+            
+            // Quitar animación después de 1 segundo (simulado)
+            setTimeout(function() {
+                icon.classList.remove('fa-spin');
+            }, 1000);
+        });
+    });
+</script>
 
 <script>
     async function iniciarSincronizacionMasiva() {
