@@ -51,4 +51,9 @@ urlpatterns = [
 
     # RUTA PARA DESUSCRIPCIÓN AUTOMÁTICA
     path('desuscribir/<int:id_cliente>/', views.desuscribir_cliente, name='desuscribir_cliente'),
+
+    # RUTAS DE REPORTES
+    path('reportes/', views.panel_reportes, name='panel_reportes'),
+    path('reportes/exportar/ventas/', views.reporte_ventas_excel, name='exportar_ventas'),
+    path('reportes/exportar/no-renovacion/', views.reporte_no_renovacion_excel, name='exportar_no_renovacion'),
 ]

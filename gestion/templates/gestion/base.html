@@ -29,7 +29,7 @@
             <a class="nav-link {% if 'productos' in request.path %}active{% endif %}" href="{% url 'lista_productos' %}">
                 <i class="fas fa-box"></i> Servicios
             </a>
-            <a class="nav-link" href="#">
+            <a class="nav-link {% if 'reportes' in request.path %}active{% endif %}" href="{% url 'panel_reportes' %}">
                 <i class="fas fa-chart-bar"></i> Reportes
             </a>
             <a class="nav-link {% if 'perfil' in request.path %}active{% endif %}" href="{% url 'perfil_usuario' %}">

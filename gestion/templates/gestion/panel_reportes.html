@@ -1,0 +1,64 @@
+{% extends 'gestion/base.html' %}
+{% block page_title %}Centro de Reportes{% endblock %}
+{% block content %}
+<div class="container mt-4">
+   
+    <div class="row justify-content-center">
+        <div class="col-md-5 mb-4">
+            <div class="card h-100 shadow-sm border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="my-1"><i class="fas fa-chart-line"></i> Reporte de renovaciones y ventas</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Genera un listado de clientes <strong>Nuevos</strong> y <strong>Renovados</strong>.
+                    </p>
+                    <form action="{% url 'exportar_ventas' %}" method="GET">
+                        <div class="mb-3">
+                            <label class="form-label">Desde:</label>
+                            <input type="date" name="fecha_ini" class="form-control" required value="{{ primer_dia_mes }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Hasta:</label>
+                            <input type="date" name="fecha_fin" class="form-control" required value="{{ fecha_hoy }}">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="fas fa-file-excel"></i> Descargar Excel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5 mb-4">
+            <div class="card h-100 shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="my-1"><i class="fas fa-user-times"></i> Reporte de clientes no renovados</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Listado de clientes que <strong>no renovaron</strong> (Inactivos/Vencidos) incluyendo motivos.
+                    </p>
+                    <form action="{% url 'exportar_no_renovacion' %}" method="GET">
+                        <div class="mb-3">
+                            <label class="form-label">Desde (Vencimiento):</label>
+                            <input type="date" name="fecha_ini" class="form-control" required value="{{ primer_dia_mes }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Hasta (Vencimiento):</label>
+                            <input type="date" name="fecha_fin" class="form-control" required value="{{ fecha_hoy }}">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="fas fa-file-excel"></i> Descargar Excel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

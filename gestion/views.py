@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .services import conectar_y_contar_facturas, verificar_alertas_plan
 from django.db.models import F
+from django.http import HttpResponse
 
 # Django contrib
 from django.contrib import messages
@@ -695,3 +696,110 @@ def desuscribir_cliente(request, id_cliente):
         
         # Renderizamos una página de confirmación simple
         return render(request, 'gestion/desuscrito.html', {'cliente': cliente})
+    
+# ==========================================
+# GESTIÓN DE REPORTES Y EXPORTACIÓN
+# ==========================================
+
+@login_required
+def panel_reportes(request):
+    fecha_actual = datetime.now()
+    context = {
+        'fecha_hoy': fecha_actual.strftime('%Y-%m-%d'),
+        'primer_dia_mes': fecha_actual.replace(day=1).strftime('%Y-%m-%d')
+    }
+    return render(request, 'gestion/panel_reportes.html', context)
+
+@login_required
+def reporte_ventas_excel(request):
+    fecha_ini = request.GET.get('fecha_ini')
+    fecha_fin = request.GET.get('fecha_fin')
+
+    if not fecha_ini or not fecha_fin:
+        messages.error(request, "Por favor seleccione un rango de fechas válido.")
+        return redirect('panel_reportes')
+
+    # Crear libro de Excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Reporte de Ventas"
+
+    # Encabezados
+    headers = ["Estado", "Cliente", "RUC", "Proveedor", "Plan/Producto", "Precio Pactado", "Fecha Transacción"]
+    ws.append(headers)
+
+    # 1. Buscar CLIENTES NUEVOS (Basado en fecha_creacion del servicio)
+    nuevos = DatosGeneralesCliente.objects.select_related('servicio', 'servicio__producto', 'proveedor').filter(
+        servicio__fecha_creacion__range=[fecha_ini, fecha_fin]
+    )
+
+    for c in nuevos:
+        ws.append([
+            "NUEVO",
+            c.nombres_cliente, 
+            c.ruc_cliente, 
+            c.proveedor.nombre,
+            c.servicio.producto.nombre_producto,
+            c.servicio.precio_pactado,
+            c.servicio.fecha_creacion,
+        ])
+
+    # 2. Buscar CLIENTES RENOVADOS (Basado en fecha_renovacion)
+    renovados = DatosGeneralesCliente.objects.select_related('servicio', 'servicio__producto', 'proveedor').filter(
+        servicio__fecha_renovacion__range=[fecha_ini, fecha_fin]
+    )
+
+    for c in renovados:
+        ws.append([
+            "RENOVADOS",
+            c.nombres_cliente, 
+            c.ruc_cliente, 
+            c.proveedor.nombre,
+            c.servicio.producto.nombre_producto,
+            c.servicio.precio_pactado,
+            c.servicio.fecha_renovacion,
+        ])
+
+    # Preparar respuesta HTTP con el archivo
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename=Reporte_Ventas_{fecha_ini}_{fecha_fin}.xlsx'
+    wb.save(response)
+    return response
+
+@login_required
+def reporte_no_renovacion_excel(request):
+
+    fecha_ini = request.GET.get('fecha_ini')
+    fecha_fin = request.GET.get('fecha_fin')
+
+    if not fecha_ini or not fecha_fin:
+        messages.error(request, "Seleccione fechas.")
+        return redirect('panel_reportes')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "No Renovados"
+
+    headers = ["Cliente", "RUC", "Proveedor", "Fecha Vencimiento", "Estado Actual", "Observación General", "Observación Servicio"]
+    ws.append(headers)
+    
+    no_renovados = DatosGeneralesCliente.objects.select_related('servicio', 'estado', 'proveedor').filter(
+        servicio__fecha_vencimiento__range=[fecha_ini, fecha_fin],
+        activo=False
+    )
+
+    for c in no_renovados:
+        ws.append([
+            c.nombres_cliente,
+            c.ruc_cliente,
+            c.proveedor.nombre,
+            c.servicio.fecha_vencimiento,
+            c.estado.estado if c.estado else "Sin Estado",
+            c.observaciones,        
+            c.servicio.observaciones 
+        ])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename=Reporte_NoRenovacion_{fecha_ini}_{fecha_fin}.xlsx'
+    wb.save(response)
+    return response
