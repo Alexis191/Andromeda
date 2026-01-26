@@ -68,3 +68,8 @@ Nota de Seguridad: Se recomienda cambiar estas contraseñas inmediatamente si se
 👥 Autores
 Alexis Xavier Collaguazo Andrango - Desarrollo e Implementación
 Universidad Politécnica Salesiana - Carrera de Negocios Digitales
+
+
+python manage.py shell
+from gestion.tasks import tarea_monitoreo_diario
+tarea_monitoreo_diario()
