@@ -55,14 +55,14 @@ WSGI_APPLICATION = 'menatics.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql', #sql_server.pyodbc
+        'ENGINE': 'mssql', 
         'NAME': 'Andromeda',
-        'USER': 'sa',           # <-- Cambia esto por tu usuario de SQL Server
-        'PASSWORD': '1q2w3eMenatics',    # <-- Cambia esto por tu contraseña de SQL Server
-        'HOST': '192.168.1.46',              # O la IP de tu servidor SQL (ej. '127.0.0.1')
-        'PORT': '1433',                       # Usualmente vacío, o '1433' si tienes un puerto específico
+        'USER': 'sa',           
+        'PASSWORD': '1q2w3eMenatics',    
+        'HOST': '192.168.1.46',              
+        'PORT': '1433',                       
         'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server', # O la versión de tu driver, si es diferente
+            'driver': 'ODBC Driver 17 for SQL Server', 
         },
     }
 }
@@ -109,8 +109,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configuración para usar Email en el Login
 AUTHENTICATION_BACKENDS = [
-    'menatics.authentication.EmailBackend',  # El archivo que acabamos de crear
-    'django.contrib.auth.backends.ModelBackend', # Respaldo (para el admin por defecto)
+    'menatics.authentication.EmailBackend', 
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 LOGIN_URL = 'login'
@@ -120,15 +120,12 @@ LOGOUT_REDIRECT_URL = 'login'
 # Cierra la sesión automáticamente al cerrar el navegador
 #SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# menatics/settings.py
-
-# Configuración de Correo (Ejemplo para Gmail, cambia según tu proveedor)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com' # O tu servidor SMTP corporativo (ej: outlook.office365.com)
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'collaguazoalexis99@gmail.com'
-EMAIL_HOST_PASSWORD = 'btag wfns bbcj ljmk' # Usa App Password si es Gmail/Outlook
+EMAIL_HOST_PASSWORD = 'btag wfns bbcj ljmk'
 DEFAULT_FROM_EMAIL = 'Sistema Andrómeda <collaguazoalexis99@gmail.com>'
 
 # Correo del personal operativo que recibirá las alertas
@@ -149,36 +146,19 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {message}',
             'style': '{',
         },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
     },
     'handlers': {
-        # Handler para registrar TODO (Info, Errores, Warnings) en un archivo que rota cada día
-        'file_automatizacion': {
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(LOGS_DIR, 'automatizacion.log'),
-            'when': 'midnight',    # Rota a la medianoche
-            'interval': 1,         # Cada 1 día
-            'backupCount': 30,     # Mantiene solo los últimos 30 archivos (días)
-            'formatter': 'verbose',
-            'encoding': 'utf-8',
-        },
-        # Opcional: Handler para ver los logs en la consola mientras desarrollas
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+            'formatter': 'verbose',
         },
     },
     'loggers': {
-        # Este logger se usará específicamente en tu app 'gestion'
         'gestion_logger': {
-            'handlers': ['file_automatizacion', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
-            'propagate': False,
+            'propagate': True,
         },
     },
 }

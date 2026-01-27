@@ -71,7 +71,8 @@
                         <thead class="bg-light text-secondary">
                             <tr>
                                 <th class="ps-4">Cliente / RUC</th>
-                                <th>Plan Contratado</th>
+                                <th>Plan contratado</th>
+                                <th>Distribuidor</th>
                                 <th>Estado</th>
                                 <th>Vigencia</th>
                                 <th>Consumo</th>
@@ -98,19 +99,36 @@
                                 </td>
 
                                 <td>
-                                    {% if "Activo" in c.servicio.estado.estado or "Renovado" in c.servicio.estado.estado %}
-                                        <span class="badge bg-success text-success px-3 py-2 rounded-pill">
-                                            ● {{ c.servicio.estado.estado }}
-                                        </span>
-                                    {% elif "No Renovado" in c.servicio.estado.estado %}
-                                        <span class="badge bg-danger text-danger px-3 py-2 rounded-pill">
-                                            ● {{ c.servicio.estado.estado }}
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill">
-                                            ● {{ c.servicio.estado.estado }}
-                                        </span>
-                                    {% endif %}
+                                    <span class="badge bg-light text-dark border">
+                                        {{ c.proveedor }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% with estado_str=c.estado.estado %}
+                                        
+                                        {% if "Activo" in estado_str or "Renovado" in estado_str or "Nuevo" in estado_str %}
+                                            <span class="badge bg-success text-success px-3 py-2 rounded-pill bg-opacity-10">
+                                                <i class="fas fa-check-circle me-1"></i> {{ estado_str }}
+                                            </span>
+                                        
+                                        {% elif "Pendiente" in estado_str %}
+                                            <span class="badge bg-warning text-warning px-3 py-2 rounded-pill bg-opacity-10">
+                                                <i class="fas fa-exclamation-circle me-1"></i> {{ estado_str }}
+                                            </span>
+
+                                        {% elif "No Renovado" in estado_str or "Suspendido" in estado_str or "Inactivo" in estado_str %}
+                                            <span class="badge bg-danger text-danger px-3 py-2 rounded-pill bg-opacity-10">
+                                                <i class="fas fa-times-circle me-1"></i> {{ estado_str }}
+                                            </span>
+
+                                        {% else %}
+                                            <span class="badge bg-secondary text-secondary px-3 py-2 rounded-pill bg-opacity-10">
+                                                {{ estado_str }}
+                                            </span>
+                                        {% endif %}
+
+                                    {% endwith %}
                                 </td>
 
                                 <td>
