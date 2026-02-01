@@ -1,5 +1,8 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -125,7 +128,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'collaguazoalexis99@gmail.com'
-EMAIL_HOST_PASSWORD = 'btag wfns bbcj ljmk'
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'Sistema Andrómeda <collaguazoalexis99@gmail.com>'
 
 # Correo del personal operativo que recibirá las alertas
