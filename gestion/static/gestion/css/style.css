@@ -1,4 +1,20 @@
-/* gestion/static/gestion/css/style.css */
+:root {
+    --color-primario: #f4a51c;
+    --color-secundario: #404040;
+    --color-aux: #0d6efd;
+}
+
+.text-primario {
+    color: var(--color-primario);
+}
+
+.text-secundario {
+    color: var(--color-secundario);
+}
+
+.text-aux {
+    color: var(--color-aux);
+}
 
 /* Estilos generales */
 body {
@@ -18,6 +34,10 @@ body {
     z-index: 1000;
 }
 
+.bg-principal{
+    background-color: var(--color-primario);
+}
+
 .logo-area {
     padding: 20px;
     text-align: center;
@@ -31,24 +51,22 @@ body {
 }
 
 .nav-link {
-    color: #555;
+    color: var(--color-secundario);
     font-weight: 500;
     padding: 15px 20px;
     transition: all 0.3s;
     display: flex;
     align-items: center;
 }
-
+    
 .nav-link:hover {
-    background-color: #fff3cd; 
-    color: #FFA500;
+    background-color: #d3d3d3; 
+    color: #000;
 }
 
 .nav-link.active {
     background-color: #f4a51c; 
-    color: white;
-    border-radius: 0 25px 25px 0;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    color: #fff;
 }
 
 .nav-link i {
@@ -63,17 +81,54 @@ body {
 
 /* Botones bersonalizados */
 .btn-menatics {
-    background-color: #f4a51c;
-    color: white;
-    font-weight: bold;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: var(--color-primario);
+    color: #fff;
+    border-color: var(--color-primario);
     transition: transform 0.2s;
 }
 
 .btn-menatics:hover {
-    background-color: #e69500;
-    color: white;
+    color: var(--color-secundario);
+    border-color: var(--color-primario);
+    transform: translateY(-2px);
+}
+
+.btn-outline-aux{
+    color: var(--color-secundario);
+    border-color: var(--color-primario);
+    transition: transform 0.2s;
+}
+
+.btn-outline-aux:hover{
+    background-color: var(--color-primario);
+    color: #fff;
+    border-color: var(--color-primario);
+    transform: translateY(-2px);
+}
+
+.btn-outline-secundario{
+    color: var(--color-secundario);
+    border-color: var(--color-secundario);
+    transition: transform 0.2s;
+}
+
+.btn-outline-secundario:hover{
+    background-color: var(--color-secundario);
+    color: #fff;
+    border-color: var(--color-secundario);
+    transform: translateY(-2px);
+}
+
+.btn-outline-primario{
+    color: var(--color-aux);
+    border-color: var(--color-aux);
+    transition: transform 0.2s;
+}
+
+.btn-outline-primario:hover{
+    background-color: var(--color-aux);
+    color: #fff;
+    border-color: var(--color-aux);
     transform: translateY(-2px);
 }
 

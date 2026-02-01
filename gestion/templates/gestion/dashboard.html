@@ -5,7 +5,7 @@
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 <style>
     #calendar {
-        max-width: 100%;
+        max-width: 90%;
         margin: 0 auto;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
@@ -19,7 +19,7 @@
         cursor: pointer;
         border: none;
         padding: 2px;
-        font-size: 0.85em;
+        font-size: 0.80em;
         transition: transform 0.2s;
     }
     .fc-event:hover {
@@ -36,22 +36,27 @@
 
 <div class="d-flex justify-content-start align-items-center mb-4 gap-3">
     <div class="btn-group">
-        <a href="{% url 'crear_cliente' %}" class="btn btn-menatics text-white fw-bold">
-            <i class="fas fa-plus-circle me-2"></i> Registrar Nuevo Cliente
+        <a href="{% url 'crear_cliente' %}" class="btn btn-outline-aux border-2 px-3 py-2 rounded fw-semibold 
+                   shadow-sm transition-all hover-lift">
+            <i class="fas fa-user-plus me-2"></i>Nuevo cliente
         </a>
     </div>
-    <button class="btn btn-menatics" data-bs-toggle="modal" data-bs-target="#modalCrear">
-        <i class="fas fa-plus me-2"></i> Registrar Nuevo Distribuidor
-    </button>
     <div class="btn-group">
-        <a href="{% url 'crear_cliente' %}" class="btn btn-menatics text-white fw-bold">
-            <i class="fas fa-plus-circle me-2"></i> Reportes
+        <a href="{% url 'lista_proveedores' %}" class="btn btn-outline-secundario border-2 px-3 py-2 rounded fw-semibold 
+                   shadow-sm transition-all hover-lift">
+            <i class="fas fa-users me-2"></i>Nuevo distribuidor
+        </a>
+    </div>
+    <div class="btn-group">
+        <a href="{% url 'panel_reportes' %}" class="btn btn-outline-primario border-2 px-3 py-2 rounded fw-semibold 
+                   shadow-sm transition-all hover-lift">
+            <i class="fas fa-chart-bar me-2"></i>Ver reportes
         </a>
     </div>
 
-    <button type="button" class="btn btn-menatics " onclick="iniciarSincronizacionMasiva()">
-        <i class="fas fa-sync-alt"></i> Actualizar Todo
-    </button>
+    <!-- <button type="button" class="btn btn-menatics " onclick="iniciarSincronizacionMasiva()">
+        <i class="fas fa-sync-alt me-2"></i> Sincronizar Todo
+    </button> -->
 
     <div class="modal fade" id="modalSincronizacion" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -79,7 +84,7 @@
 
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="fw-bold mb-0 text-secondary"><i class="fas fa-calendar-alt me-2"></i>Calendario de Vencimientos</h5>
+        <h5 class="fw-bold mb-0 text-secundario"><i class="fas fa-calendar-alt me-2"></i>Calendario de vencimientos</h5>
         
         <button id="btnRefetchCalendar" class="btn btn-sm btn-outline-primary">
             <i class="fas fa-sync-alt me-1"></i> Actualizar Calendario
@@ -136,7 +141,7 @@
     });
 </script>
 
-<script>
+<!-- <script>
     async function iniciarSincronizacionMasiva() {
         const statusText = document.getElementById('syncStatusText');
         const progressBar = document.getElementById('syncProgressBar');
@@ -242,5 +247,5 @@
             btnClose.disabled = false;
         }
     }
-</script>
+</script> -->
 {% endblock %}

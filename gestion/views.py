@@ -664,14 +664,16 @@ def api_eventos_calendario(request):
         else:
             titulo = c.nombres_cliente
 
-        nombre_estado = c.estado.estado.lower().strip() if c.estado else ""
+        nombre_estado = c.estado.estado if c.estado else ""
         
         color = "#ffc107" 
         
-        if "pendiente" in nombre_estado:
-            color = "#f4a51c" 
-        elif "activo" in nombre_estado or "renovado" or "nuevo" in nombre_estado:
-            color = "#28a745" 
+        if "NO RENOVADO" in nombre_estado:
+            color = "#dc3545"
+        elif "PENDIENTE" in nombre_estado:
+            color = "#F4A51C"
+        elif "NUEVO" in nombre_estado or "RENOVADO" in nombre_estado:
+            color = "#28a745"
             
         eventos.append({
             'title': titulo,

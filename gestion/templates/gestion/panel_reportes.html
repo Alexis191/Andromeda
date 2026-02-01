@@ -1,5 +1,5 @@
 {% extends 'gestion/base.html' %}
-{% block page_title %}Centro de Reportes{% endblock %}
+{% block page_title %}Centro de reportes{% endblock %}
 {% block content %}
 <div class="container mt-4">
    
@@ -11,7 +11,7 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted">
-                        Genera un listado de clientes <strong>Nuevos</strong> y <strong>Renovados</strong>.
+                        Genera un listado de clientes <strong>Nuevos</strong> y <strong>Renovados</strong>, filtrados por <strong>fecha de renovación</strong> (Inicio/Final).
                     </p>
                     <form action="{% url 'exportar_ventas' %}" method="GET">
                         <div class="mb-3">
@@ -35,11 +35,11 @@
         <div class="col-md-5 mb-4">
             <div class="card h-100 shadow-sm border-danger">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="my-1"><i class="fas fa-user-times"></i> Reporte de clientes no renovados</h5>
+                    <h5 class="my-1"><i class="fas fa-user-times"></i> Reporte de clientes o renovados</h5>
                 </div>
                 <div class="card-body">
                     <p class="text-muted">
-                        Listado de clientes que <strong>no renovaron</strong> (Inactivos/Vencidos) incluyendo motivos.
+                        Listado de clientes que <strong>No Renovaron</strong> (Inactivos/Vencidos) incluyendo motivos, filtrados por <strong>fecha de vencimiento</strong> (Inicio/Final).
                     </p>
                     <form action="{% url 'exportar_no_renovacion' %}" method="GET">
                         <div class="mb-3">

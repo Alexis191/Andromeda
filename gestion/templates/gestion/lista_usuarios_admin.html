@@ -1,10 +1,11 @@
 {% extends 'gestion/base.html' %}
-{% block page_title %}Gestión de Usuarios (Admin){% endblock %}
+{% block page_title %}Gestión de usuarios{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-end mb-3">
-    <a href="{% url 'crear_usuario' %}" class="btn btn-menatics">
-        <i class="fas fa-user-shield me-2"></i> Crear Nuevo Usuario
+    <a href="{% url 'crear_usuario' %}" class="btn btn-menatics border-2 px-3 py-2 rounded fw-semibold 
+                   shadow-sm transition-all hover-lift">
+        <i class="fas fa-user-shield me-2"></i>Nuevo usuario
     </a>
 </div>
 
