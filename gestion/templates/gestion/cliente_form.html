@@ -212,12 +212,10 @@
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Servidor de alojamiento</label>
                     {{ form_tecnico.servidor_alojamiento }}
-                    <div class="form-text">Servidor físico donde reside la base de datos.</div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Nombre de base de datos</label>
                     {{ form_tecnico.nombre_basedatos }}
-                    <div class="form-text">Nombre exacto en SQL Server (Ej: BD_CLIENTE_2025).</div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold">URL del portal</label>
@@ -298,13 +296,10 @@
         checkAlternativo.addEventListener('change', toggleAlternativo);
     });
 
-    // 2. NUEVO: Script para consultar BD Externa (RF22)
     async function consultarBaseExterna() {
     const btn = document.getElementById('btn-consultar-db');
     const msg = document.getElementById('msg-consulta');
     
-    // --- IMPORTANTE: Verificamos que este ID exista en tu HTML ---
-    // Django suele ponerle 'id_' al principio del nombre del campo
     const inputFacturas = document.getElementById('id_facturas_consumidas'); 
 
     if (!inputFacturas) {
@@ -339,7 +334,6 @@
             })
         });
 
-        // Verificamos si la respuesta es válida antes de convertirla
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
@@ -356,50 +350,38 @@
         }
 
     } catch (error) {
-        // --- AQUÍ VEREMOS EL ERROR REAL ---
         console.error("Error JS completo:", error);
-        msg.innerHTML = "Error JS: " + error.message; // <--- Muestra esto en pantalla
+        msg.innerHTML = "Error JS: " + error.message;
         msg.className = "form-text text-danger fw-bold";
     } finally {
         btn.disabled = false;
     }
 }
 document.addEventListener('DOMContentLoaded', function() {
-        // ... (Tu código existente de contacto alternativo y base de datos) ...
-
-        // ---------------------------------------------------------
-        // NUEVO: FORZAR MAYÚSCULAS AL ESCRIBIR
-        // ---------------------------------------------------------
-        // Seleccionamos los campos específicos por su ID de Django
-        const camposMayusculas = [
+            const camposMayusculas = [
             'id_nombres_cliente',
             'id_direccion',
             'id_observaciones',
             'id_observacion_alt',
-            // Agrega aquí cualquier otro ID que quieras en mayúsculas
         ];
 
         camposMayusculas.forEach(function(id) {
             const input = document.getElementById(id);
             if (input) {
-                // Agregar clase visual CSS
                 input.classList.add('uppercase-input');
                 
-                // Evento JS para cambiar el valor real a mayúsculas mientras se escribe
                 input.addEventListener('input', function() {
-                    let start = this.selectionStart; // Guardar posición del cursor
+                    let start = this.selectionStart; 
                     let end = this.selectionEnd;
                     
                     this.value = this.value.toUpperCase();
                     
-                    this.setSelectionRange(start, end); // Restaurar cursor
+                    this.setSelectionRange(start, end); 
                 });
             }
         });
     });
     function enviarWhatsAppRecordatorio() {
-        // 1. Obtener los valores del formulario
-        // Nota: Usamos los IDs que Django genera automáticamente (id_nombrecampo)
         const inputTelefono = document.getElementById('id_telefono_cliente');
         const inputFechaVenc = document.getElementById('id_fecha_vencimiento');
         const inputNombre = document.getElementById('id_nombres_cliente');
@@ -408,7 +390,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let fecha = inputFechaVenc.value;
         let nombre = inputNombre.value;
 
-        // 2. Validaciones básicas
         if (!telefono) {
             alert("Por favor escribe un número de teléfono primero.");
             inputTelefono.focus();
@@ -420,22 +401,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // 3. Formatear el teléfono para WhatsApp (Ecuador)
-        // Quitamos espacios, guiones y paréntesis
         telefono = telefono.replace(/[^0-9]/g, '');
 
-        // Si empieza con '09', le quitamos el '0' y agregamos '593'
         if (telefono.startsWith('09') && telefono.length === 10) {
             telefono = '593' + telefono.substring(1);
         } 
-        // Si el usuario ya puso 593, lo dejamos. Si puso solo 9..., agregamos 593.
         else if (telefono.startsWith('9') && telefono.length === 9) {
             telefono = '593' + telefono;
         }
 
-        // 4. Construir el mensaje
-        // "Buen día estimado [Nombre], le informamos que su servicio..."
-        // Usamos encodeURIComponent para que los espacios y tildes funcionen en la URL
         const mensajeTexto = `Buen día estimado ${nombre}, le informamos que su servicio de facturación electrónica está por caducar el ${fecha}. Le invitamos a renovar para evitar interrupciones.`;
         
         const mensajeCodificado = encodeURIComponent(mensajeTexto);

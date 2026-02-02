@@ -1,10 +1,12 @@
 import logging
 import sys
 import os
+import traceback
 from datetime import datetime, date, timedelta
 from django.conf import settings
 from .models import DatosGeneralesCliente, EstadoCliente
 from .services import *
+from django.core.mail import send_mail
 
 class StreamToLogger(object):
     def __init__(self, logger, log_level=logging.INFO):
@@ -19,6 +21,28 @@ class StreamToLogger(object):
 
     def flush(self):
         pass
+
+def enviar_alerta_operaciones(asunto, lista_errores):
+    if not lista_errores:
+        return
+
+    mensaje_cuerpo = "Se han detectado los siguientes errores/advertencias en la tarea de monitoreo diario:\n\n"
+    for error in lista_errores:
+        mensaje_cuerpo += f"- {error}\n"
+    
+    mensaje_cuerpo += f"\nFecha de ejecución: {datetime.now()}"
+
+    try:
+        send_mail(
+            subject=f"⚠️ [ALERTA ANDRÓMEDA] {asunto}",
+            message=mensaje_cuerpo,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=settings.OPERATIONS_EMAIL,
+            fail_silently=False,
+        )
+        print("Correo de alerta enviado a Operaciones.")
+    except Exception as e:
+        print(f"Error al enviar alerta por correo: {e}")
 
 # --- FUNCIÓN PRINCIPAL ---
 def tarea_monitoreo_diario():
@@ -53,6 +77,8 @@ def tarea_monitoreo_diario():
     logger.info("="*50)
     logger.info(f"INICIO EJECUCIÓN TAREA: {datetime.now()}")
     logger.info("="*50)
+
+    errores_detectados = []
 
     try:
         print(f"--- Ejecutando Monitoreo de Estados: {date.today()} ---")
@@ -110,15 +136,18 @@ def tarea_monitoreo_diario():
                         print(f"[OK] {cliente.nombres_cliente}: {consumo} facturas.")
                         exitos += 1
                     else:
-                        print(f"[ERROR SQL] {cliente.nombres_cliente} en {srv.ip_host}")
+                        msg = f"[ERROR SQL] {cliente.nombres_cliente} en {srv.ip_host} ({db})"
+                        print(msg)
+                        errores_detectados.append(msg)
                         errores += 1
 
                 verificar_vencimiento_15_dias(cliente)
 
             except Exception as e:
-                print(f"[ERROR PROCESANDO CLIENTE] {cliente.nombres_cliente}: {e}")
-                import traceback
+                msg = f"[ERROR PROCESANDO CLIENTE] {cliente.nombres_cliente}: {e}"
+                print(msg)
                 traceback.print_exc()
+                errores_detectados.append(msg)
                 errores += 1
 
         logger.info("-" * 50)
@@ -127,10 +156,16 @@ def tarea_monitoreo_diario():
         logger.info(f"   - Lecturas SQL exitosas: {exitos}")
         logger.info(f"   - Errores encontrados: {errores}")
 
+        if errores_detectados:
+            logger.info(f"Enviando reporte de {len(errores_detectados)} errores a Operaciones...")
+            enviar_alerta_operaciones("Reporte de Errores", errores_detectados)
+
     except Exception as e:
-        logger.critical(f"ERROR FATAL EN LA TAREA PRINCIPAL: {e}")
-        import traceback
+        msg_fatal = f"ERROR FATAL EN LA TAREA PRINCIPAL: {e}"
+        logger.critical(msg_fatal)
         traceback.print_exc()
+
+        enviar_alerta_operaciones("¡FALLO CRÍTICO DEL SCRIPT!", [msg_fatal])
 
     finally:
         sys.stdout = stdout_original

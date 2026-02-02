@@ -99,7 +99,8 @@ class ClienteForm(EstiloFormMixin, forms.ModelForm):
                 'oninput': "this.value = this.value.replace(/[^0-9]/g, '')",
                 'placeholder': '0999999999'
             }),
-            'nombres_cliente': forms.TextInput(attrs={'class': 'text-uppercase', 'placeholder': 'Escribe la razón social del cliente'}),
+            'nombres_cliente': forms.TextInput(attrs={'placeholder': 'Escribe la razón social del cliente'}),
+            'correo_cliente': forms.TextInput(attrs={'placeholder': 'info@menaticscorp.com.ec'}),
             'direccion': forms.Textarea(attrs={'rows': 2, 'class': 'text-uppercase'}),
             'observacion_alt': forms.Textarea(attrs={'rows': 1, 'class': 'text-uppercase'}),
         }
@@ -137,6 +138,17 @@ class TecnicoForm(EstiloFormMixin, forms.ModelForm):
         model = DatosTecnicosCliente
         exclude = ['cliente'] 
         widgets = {
+            'nombre_basedatos': forms.TextInput(attrs={'placeholder': 'Ej: MenaticsCorp'}),
+            'url_portal': forms.TextInput(attrs={'placeholder': 'Ej: 186.4.213.205:8101'}),
+            'clave_portal': forms.TextInput(attrs={'class': 'text-uppercase'}),
+            'firma': forms.TextInput(attrs={'placeholder': 'Ej: firmaelectronica32'}),
+            'email_tecnico': forms.TextInput(attrs={'placeholder': 'Ej: facturas@gmail.com'}),
+            'clave_email': forms.TextInput(attrs={'placeholder': 'Ej: micontraseña'}),
+            'clave_portal': forms.TextInput(attrs={'placeholder': 'Ej: micontraseña'}),
+            'code_email': forms.TextInput(attrs={'placeholder': 'Ej: nnphuaaynaflkfxc'}),
+            'version': forms.NumberInput(attrs={'placeholder': '106'}),
+            'num_portal': forms.NumberInput(attrs={'placeholder': '8101'}),
+            'num_servicios': forms.NumberInput(attrs={'placeholder': '8102'}),
         }
 
 # FORMULARIO 6: SUBIR ARCHIVO EXCEL PARA IMPORTAR DATOS

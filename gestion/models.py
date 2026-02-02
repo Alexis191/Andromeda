@@ -60,11 +60,11 @@ class DatosServicio(models.Model):
     facturas_consumidas = models.IntegerField(default=0, help_text="Actualizado automáticamente desde BD externa")
 
     # Otros campos
-    precio_pactado = models.DecimalField(max_digits=10, decimal_places=2, help_text="Precio real vendido al cliente")
-    observaciones = models.TextField(null=True, blank=True, verbose_name="Observaciones del Servicio")
+    precio_pactado = models.DecimalField(max_digits=10, decimal_places=2)
+    observaciones = models.TextField(null=True, blank=True)
 
     # Módulos del sistema
-    mod_ventas = models.BooleanField(default=False, verbose_name="Ventas (Facturación)")
+    mod_ventas = models.BooleanField(default=True, verbose_name="Ventas (Facturación)")
     mod_compras = models.BooleanField(default=False, verbose_name="Compras (Liq/Ret)")
     mod_tesoreria = models.BooleanField(default=False, verbose_name="Tesoreria (C x P/C)")
     mod_inventario = models.BooleanField(default=False, verbose_name="Inventario (Kardex)")
@@ -104,8 +104,8 @@ class DatosTecnicosCliente(models.Model):
     cliente = models.OneToOneField(DatosGeneralesCliente, on_delete=models.CASCADE, related_name='datos_tecnicos')
     
     # CONEXIÓN BASE DE DATOS EXTERNA 
-    servidor_alojamiento = models.ForeignKey(ServidorBaseDatos, on_delete=models.PROTECT, help_text="Servidor físico donde está la BD")
-    nombre_basedatos = models.CharField(max_length=100, help_text="Nombre de la BD en SQL Server")
+    servidor_alojamiento = models.ForeignKey(ServidorBaseDatos, on_delete=models.PROTECT)
+    nombre_basedatos = models.CharField(max_length=100)
 
     # Datos del Portal Web
     url_portal = models.CharField(max_length=200, blank=True, null=True)
