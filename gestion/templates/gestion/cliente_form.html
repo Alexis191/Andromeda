@@ -410,7 +410,9 @@ document.addEventListener('DOMContentLoaded', function() {
             telefono = '593' + telefono;
         }
 
-        const mensajeTexto = `Buen día estimado ${nombre}, le informamos que su servicio de facturación electrónica está por caducar el ${fecha}. Le invitamos a renovar para evitar interrupciones.`;
+        const mensajeTexto = `Estimado/a *${nombre}*, reciba un cordial saludo de *Corporación Menatics.*
+El motivo del mensaje es para informarle que su servicio de facturación electrónica presenta un próximo vencimiento el día *${fecha}.* Para garantizar que su emisión de comprobantes y ventas no se vean interrumpidas, le invitamos a gestionar su renovación a la brevedad.
+Quedamos a su disposición para asistirle en el proceso y asegurar la continuidad de su negocio.`;
         
         const mensajeCodificado = encodeURIComponent(mensajeTexto);
 
