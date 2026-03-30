@@ -34,7 +34,7 @@ def enviar_alerta_operaciones(asunto, lista_errores):
 
     try:
         send_mail(
-            subject=f"⚠️ [ALERTA ANDRÓMEDA] {asunto}",
+            subject=f"[ALERTA ANDRÓMEDA] {asunto}",
             message=mensaje_cuerpo,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=settings.OPERATIONS_EMAIL,
@@ -116,7 +116,12 @@ def tarea_monitoreo_diario():
                 
                 srv = cliente.datos_tecnicos.servidor_alojamiento
                 db = cliente.datos_tecnicos.nombre_basedatos
-                
+
+                if srv.id == 6:
+                    msg_omitido = f"[OMITIDO] {cliente.nombres_cliente}: Servidor configurado como localhost (ID=6)."
+                    print(msg_omitido)
+                    continue
+
                 if cliente.servicio.fecha_renovacion and cliente.servicio.fecha_vencimiento:
                     f_ini = cliente.servicio.fecha_renovacion.strftime('%d/%m/%Y')
                     f_fin = cliente.servicio.fecha_vencimiento.strftime('%d/%m/%Y')
