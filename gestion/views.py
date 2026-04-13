@@ -599,6 +599,13 @@ def api_sincronizar_cliente(request, id_cliente):
         cliente = DatosGeneralesCliente.objects.get(pk=id_cliente)
         
         srv = cliente.datos_tecnicos.servidor_alojamiento
+        if srv.id == 6 or (cliente.estado and cliente.estado.id == 3):
+            motivo = "Localhost" if srv.id == 6 else "No Renovado"
+            return JsonResponse({
+                'status': 'omitido', 
+                'cliente': cliente.nombres_cliente, 
+                'mensaje': motivo
+            })
         db = cliente.datos_tecnicos.nombre_basedatos
         f_ini = cliente.servicio.fecha_renovacion.strftime('%d/%m/%Y')
         f_fin = cliente.servicio.fecha_vencimiento.strftime('%d/%m/%Y')

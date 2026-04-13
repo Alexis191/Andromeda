@@ -22,7 +22,7 @@ def conectar_y_contar_facturas(ip, puerto, db, user, password, fecha_ini_str, fe
             query = """
                 SELECT COUNT(*) 
                 FROM FacElec_Documentos 
-                WHERE FechaEmision >= ? AND FechaEmision < ?
+                WHERE FechaEmision BETWEEN ? AND ? AND EstadoDocumento = 8
             """
             cursor.execute(query, (fecha_ini_str, fecha_fin_str))
             row = cursor.fetchone()
@@ -33,7 +33,7 @@ def conectar_y_contar_facturas(ip, puerto, db, user, password, fecha_ini_str, fe
 
 def verificar_alertas_plan(cliente, consumo_actual):
     """
-    Verifica si el cliente superó el 80% o 90% y envía correo.
+    Verifica si el cliente superó el 80% o 90% y almacena la información.
     """
     if not cliente.servicio or not cliente.servicio.producto:
         return
@@ -47,36 +47,15 @@ def verificar_alertas_plan(cliente, consumo_actual):
         return
 
     porcentaje = (consumo_actual / limite_plan) * 100
-    tipo_alerta = ""
-    asunto = ""
 
     if porcentaje >= 90:
-        tipo_alerta = "CRÍTICA"
-        asunto = f"🚨 ALERTA CRÍTICA: Cliente {cliente.nombres_cliente} al {porcentaje:.1f}% de su plan"
+        tipo = "CRÍTICA (>=90%)"
     elif porcentaje >= 80:
-        tipo_alerta = "ADVERTENCIA"
-        asunto = f"⚠️ ALERTA DE CONSUMO: Cliente {cliente.nombres_cliente} al {porcentaje:.1f}% de su plan"
+        tipo = "ADVERTENCIA (>=80%)"
+    else:
+        return None
 
-    if asunto:
-        mensaje = (
-            f"El cliente {cliente.nombres_cliente} (RUC: {cliente.ruc_cliente}) ha emitido "
-            f"{consumo_actual} de {limite_plan} facturas permitidas.\n\n"
-            f"Plan: {producto.nombre_producto}\n"
-            f"Vencimiento: {cliente.servicio.fecha_vencimiento}\n\n"
-            "Acción requerida: Contactar al cliente para ampliación de plan."
-        )
-        
-        try:
-            send_mail(
-                asunto,
-                mensaje,
-                settings.DEFAULT_FROM_EMAIL,
-                settings.OPERATIONS_EMAIL, 
-                fail_silently=False,
-            )
-            print(f"Correo enviado para {cliente.nombres_cliente} ({tipo_alerta})")
-        except Exception as e:
-            print(f"Error enviando correo: {e}")
+    return f"- [{tipo}] {cliente.nombres_cliente} (RUC: {cliente.ruc_cliente}): {consumo_actual}/{limite_plan} facturas consumidas ({porcentaje:.1f}%)."
 
 def verificar_vencimiento_15_dias(cliente):
     """
@@ -88,7 +67,7 @@ def verificar_vencimiento_15_dias(cliente):
 
     # IMPORTANTE: Respetar la Ley de Protección de Datos
     if not cliente.envio_email:
-        print(f"🔕 Omitiendo aviso de vencimiento a {cliente.nombres_cliente} (Desuscrito).")
+        print(f"Omitiendo aviso de vencimiento a {cliente.nombres_cliente} (Desuscrito).")
         return
 
     # 2. Calcular días restantes
@@ -98,7 +77,7 @@ def verificar_vencimiento_15_dias(cliente):
 
     # 3. Detectar si faltan 15 días
     if dias_restantes == 15:
-        print(f"📧 Enviando aviso de 15 días a {cliente.nombres_cliente}...")
+        print(f"Enviando aviso de 15 días a {cliente.nombres_cliente}...")
         
         # Configuración del correo
         asunto = f"⏳ Tu plan vence en 15 días - {cliente.nombres_cliente}"
@@ -133,15 +112,15 @@ def verificar_vencimiento_15_dias(cliente):
                     <p>Te invitamos a renovar tu servicio a tiempo para evitar interrupciones en la emisión de tus comprobantes.</p>
                     
                     <p style="text-align: center; margin-top: 30px;">
-                        <a href="https://wa.link/94mx86" style="background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Contactar para Renovar</a>
+                        <a href="https://wa.link/edtfdb" style="background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Contactar para Renovar</a>
                     </p>
                 </div>
 
                 <div style="background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #777;">
                     <p>Has recibido este correo porque eres cliente de Menatics.</p>
                     <p>
-                        ¿Ya no deseas recibir estos recordatorios? 
-                        <a href="{link_baja}" style="color: #dc3545; text-decoration: underline;">Date de baja aquí</a>.
+                        ¿Ya no deseas recibir estos recordatorios?<br>
+                        Envía un correo electrónico a: soportecnico@menaticscorp.com.ec 
                     </p>
                 </div>
             </div>
@@ -156,3 +135,5 @@ def verificar_vencimiento_15_dias(cliente):
             print("✅ Correo enviado exitosamente.")
         except Exception as e:
             print(f"❌ Error enviando correo: {e}")
+
+#<a href="{link_baja}" style="color: #dc3545; text-decoration: underline;">Date de baja aquí</a>.

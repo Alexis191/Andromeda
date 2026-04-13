@@ -54,9 +54,9 @@
         </a>
     </div>
 
-    <!-- <button type="button" class="btn btn-menatics " onclick="iniciarSincronizacionMasiva()">
+    <button type="button" class="btn btn-menatics " onclick="iniciarSincronizacionMasiva()">
         <i class="fas fa-sync-alt me-2"></i> Sincronizar Todo
-    </button> -->
+    </button>
 
     <div class="modal fade" id="modalSincronizacion" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -141,7 +141,7 @@
     });
 </script>
 
-<!-- <script>
+<script>
     async function iniciarSincronizacionMasiva() {
         const statusText = document.getElementById('syncStatusText');
         const progressBar = document.getElementById('syncProgressBar');
@@ -202,7 +202,12 @@
                     
                     if (datoCliente.status === 'ok') {
                         p.innerHTML = `<i class="fas fa-check text-success me-2"></i><strong>${datoCliente.cliente}</strong>: ${datoCliente.cantidad} docs`;
-                    } else {
+                    } 
+                    else if (datoCliente.status === 'omitido') {
+                        // Muestra el cliente saltado en color gris
+                        p.innerHTML = `<i class="fas fa-forward text-secondary me-2"></i><strong>${datoCliente.cliente}</strong>: Omitido (${datoCliente.mensaje})`;
+                    } 
+                    else {
                         const errorMsg = datoCliente.cliente ? 
                                        `<strong>${datoCliente.cliente}</strong>: ${datoCliente.mensaje}` : 
                                        `ID ${id}: ${datoCliente.mensaje}`;
@@ -247,5 +252,5 @@
             btnClose.disabled = false;
         }
     }
-</script> -->
+</script>
 {% endblock %}

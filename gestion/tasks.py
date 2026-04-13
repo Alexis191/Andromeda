@@ -22,27 +22,27 @@ class StreamToLogger(object):
     def flush(self):
         pass
 
-def enviar_alerta_operaciones(asunto, lista_errores):
-    if not lista_errores:
+def enviar_alerta_consumo_unificada(alertas_consumo):
+    if not alertas_consumo:
         return
 
-    mensaje_cuerpo = "Se han detectado los siguientes errores/advertencias en la tarea de monitoreo diario:\n\n"
-    for error in lista_errores:
-        mensaje_cuerpo += f"- {error}\n"
+    mensaje_cuerpo = "Se ha detectado alto consumo de facturas en los siguientes clientes:\n\n"
+    for alerta in alertas_consumo:
+        mensaje_cuerpo += f"{alerta}\n"
     
     mensaje_cuerpo += f"\nFecha de ejecución: {datetime.now()}"
 
     try:
         send_mail(
-            subject=f"[ALERTA ANDRÓMEDA] {asunto}",
+            subject="⚠️ [ALERTA DE CONSUMO] Reporte Unificado de Consumo de Clientes",
             message=mensaje_cuerpo,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=settings.OPERATIONS_EMAIL,
             fail_silently=False,
         )
-        print("Correo de alerta enviado a Operaciones.")
+        print("Correo unificado de alertas de consumo enviado a Operaciones.")
     except Exception as e:
-        print(f"Error al enviar alerta por correo: {e}")
+        print(f"Error al enviar correo unificado: {e}")
 
 # --- FUNCIÓN PRINCIPAL ---
 def tarea_monitoreo_diario():
@@ -96,11 +96,13 @@ def tarea_monitoreo_diario():
         )
         
         hoy = date.today()
-        DIAS_PARA_AVISO = 5
+        DIAS_PARA_AVISO = 15
         
         count_cambios = 0
         exitos = 0
         errores = 0
+        
+        alertas_consumo = []
 
         for cliente in clientes:
             try:
@@ -117,9 +119,9 @@ def tarea_monitoreo_diario():
                 srv = cliente.datos_tecnicos.servidor_alojamiento
                 db = cliente.datos_tecnicos.nombre_basedatos
 
-                if srv.id == 6:
-                    msg_omitido = f"[OMITIDO] {cliente.nombres_cliente}: Servidor configurado como localhost (ID=6)."
-                    print(msg_omitido)
+                if srv.id == 6 or cliente.estado.id == 3:
+                    motivo = "Servidor Localhost" if srv.id == 6 else "Estado NO RENOVADO"
+                    print(f"[OMITIDO] {cliente.nombres_cliente}: Se salta el monitoreo por {motivo}.")
                     continue
 
                 if cliente.servicio.fecha_renovacion and cliente.servicio.fecha_vencimiento:
@@ -136,14 +138,15 @@ def tarea_monitoreo_diario():
                         cliente.servicio.facturas_consumidas = consumo 
                         cliente.servicio.save(update_fields=['facturas_consumidas'])
                         
-                        verificar_alertas_plan(cliente, consumo)
+                        alerta = verificar_alertas_plan(cliente, consumo)
+                        if alerta:
+                            alertas_consumo.append(alerta)
                         
                         print(f"[OK] {cliente.nombres_cliente}: {consumo} facturas.")
                         exitos += 1
                     else:
                         msg = f"[ERROR SQL] {cliente.nombres_cliente} en {srv.ip_host} ({db})"
                         print(msg)
-                        errores_detectados.append(msg)
                         errores += 1
 
                 verificar_vencimiento_15_dias(cliente)
@@ -152,7 +155,7 @@ def tarea_monitoreo_diario():
                 msg = f"[ERROR PROCESANDO CLIENTE] {cliente.nombres_cliente}: {e}"
                 print(msg)
                 traceback.print_exc()
-                errores_detectados.append(msg)
+                # Queda en el log, no se envía por correo
                 errores += 1
 
         logger.info("-" * 50)
@@ -161,16 +164,14 @@ def tarea_monitoreo_diario():
         logger.info(f"   - Lecturas SQL exitosas: {exitos}")
         logger.info(f"   - Errores encontrados: {errores}")
 
-        if errores_detectados:
-            logger.info(f"Enviando reporte de {len(errores_detectados)} errores a Operaciones...")
-            enviar_alerta_operaciones("Reporte de Errores", errores_detectados)
+        if alertas_consumo:
+            logger.info(f"Enviando correo unificado con {len(alertas_consumo)} alertas de consumo...")
+            enviar_alerta_consumo_unificada(alertas_consumo)
 
     except Exception as e:
         msg_fatal = f"ERROR FATAL EN LA TAREA PRINCIPAL: {e}"
         logger.critical(msg_fatal)
         traceback.print_exc()
-
-        enviar_alerta_operaciones("¡FALLO CRÍTICO DEL SCRIPT!", [msg_fatal])
 
     finally:
         sys.stdout = stdout_original
