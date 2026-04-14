@@ -119,8 +119,8 @@ def tarea_monitoreo_diario():
                 srv = cliente.datos_tecnicos.servidor_alojamiento
                 db = cliente.datos_tecnicos.nombre_basedatos
 
-                if srv.id == 6 or cliente.estado.id == 3:
-                    motivo = "Servidor Localhost" if srv.id == 6 else "Estado NO RENOVADO"
+                if srv.id == 5 or cliente.estado.id == 3:
+                    motivo = "Servidor Localhost" if srv.id == 5 else "Estado NO RENOVADO"
                     print(f"[OMITIDO] {cliente.nombres_cliente}: Se salta el monitoreo por {motivo}.")
                     continue
 

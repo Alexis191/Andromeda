@@ -7,7 +7,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3xjen7-*j#k!hlwclu0x$7r!)y_hg2b1l6j9vmyc_y77c-t=um'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -61,9 +61,9 @@ DATABASES = {
         'ENGINE': 'mssql', 
         'NAME': 'Andromeda',
         'USER': 'sa',           
-        'PASSWORD': '1q2w3eMenatics',    
-        'HOST': '192.168.1.46',              
-        'PORT': '1433',                       
+        'PASSWORD': '123',    
+        'HOST': 'localhost\INFORMATICS',              
+        'PORT': '',                       
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server', 
         },
@@ -124,17 +124,19 @@ LOGOUT_REDIRECT_URL = 'login'
 #SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'collaguazoalexis99@gmail.com'
+EMAIL_HOST = 'mail.pro-smtp.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'ventas@menaticscorp.com.ec'
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = 'Sistema Andrómeda <collaguazoalexis99@gmail.com>'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+DEFAULT_FROM_EMAIL = 'Sistema Menatics <ventas@menaticscorp.com.ec>'
 
 # Correo del personal operativo que recibirá las alertas
 OPERATIONS_EMAIL = [
-    'alexisntn@hotmail.com',
-    #'compañero1@gmail.com',
+    'communitymanager@menaticscorp.com.ec',
+    'operacionesmarketing@menaticscorp.com.ec',
+    #'compañero3@menaticscorp.com.ec',
 ]
 
 LOGS_DIR = BASE_DIR / 'logs'

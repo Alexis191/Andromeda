@@ -1,0 +1,36 @@
+# --- SEGURIDAD ---
+# Ignora el archivo de variables de entorno con tus contraseñas
+.env
+
+# --- PYTHON ---
+# Ignora archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- DJANGO ---
+# Ignora la base de datos local si usas SQLite para pruebas
+db.sqlite3
+
+# Ignora archivos recolectados de estáticos y media
+/static/
+/media/
+/staticfiles/
+
+# --- LOGS ---
+# Ignora la carpeta de logs y cualquier archivo .log generado
+# Esto evita que tus logs de automatización se suban al servidor
+logs/
+*.log
+
+# --- ENTORNOS VIRTUALES ---
+# Ignora las carpetas del entorno virtual
+venv/
+env/
+.venv/
+
+# --- SISTEMA ---
+# Archivos específicos de sistemas operativos o editores
+.DS_Store
+.vscode/
+.idea/

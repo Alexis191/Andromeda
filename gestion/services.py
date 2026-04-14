@@ -22,7 +22,8 @@ def conectar_y_contar_facturas(ip, puerto, db, user, password, fecha_ini_str, fe
             query = """
                 SELECT COUNT(*) 
                 FROM FacElec_Documentos 
-                WHERE FechaEmision BETWEEN ? AND ? AND EstadoDocumento = 8
+                WHERE FechaEmision >= CONVERT(datetime, ?, 103) 
+                  AND FechaEmision < CONVERT(datetime, ?, 103) AND TipoComprobante = 01
             """
             cursor.execute(query, (fecha_ini_str, fecha_fin_str))
             row = cursor.fetchone()

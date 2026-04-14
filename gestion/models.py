@@ -51,10 +51,10 @@ class DatosServicio(models.Model):
     producto = models.ForeignKey(DatosProducto, on_delete=models.PROTECT)
     
     # Fechas
-    fecha_creacion = models.DateField(null=True, blank=True, verbose_name="Fecha de Creación")
-    fecha_renovacion = models.DateField(null=True, blank=True)
-    fecha_vencimiento = models.DateField(null=True, blank=True)
-    fecha_caducidad_firma = models.DateField(null=True, blank=True, verbose_name="Caducidad Firma")
+    fecha_creacion = models.DateField(null=True, blank=True, verbose_name="Fecha de Creación", default=None)
+    fecha_renovacion = models.DateField(null=True, blank=True, default=None)
+    fecha_vencimiento = models.DateField(null=True, blank=True, default=None)
+    fecha_caducidad_firma = models.DateField(null=True, blank=True, verbose_name="Caducidad Firma", default=None)
 
     # Consumo de facturas electrónicas
     facturas_consumidas = models.IntegerField(default=0, help_text="Actualizado automáticamente desde BD externa")
