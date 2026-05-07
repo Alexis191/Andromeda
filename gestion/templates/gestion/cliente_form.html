@@ -261,45 +261,106 @@
 </form>
 
 <script>
-    // Script simple para calcular la fecha de vencimiento automáticamente (RF: +1 Año)
-    document.getElementById('id_fecha_renovacion').addEventListener('change', function() {
-        let fechaInicio = new Date(this.value);
-        if (!isNaN(fechaInicio.getTime())) {
-            // Sumar 1 año
-            fechaInicio.setFullYear(fechaInicio.getFullYear() + 1);
-            // Formatear a YYYY-MM-DD para el input date
-            let fechaFin = fechaInicio.toISOString().split('T')[0];
-            document.getElementById('id_fecha_vencimiento').value = fechaFin;
+document.addEventListener("DOMContentLoaded", function() {
+
+    // =========================
+    // 🔵 CONTROL DE CAMBIOS
+    // =========================
+    let cambiosPendientes = false;
+    const formulario = document.querySelector('form'); 
+
+    if (formulario) {
+        const inputs = formulario.querySelectorAll('input, select, textarea');
+
+        inputs.forEach(input => {
+            input.addEventListener('input', () => { cambiosPendientes = true; });
+            input.addEventListener('change', () => { cambiosPendientes = true; });
+        });
+
+        formulario.addEventListener('submit', function() {
+            cambiosPendientes = false;
+        });
+    }
+
+    window.addEventListener('beforeunload', function(evento) {
+        if (cambiosPendientes) {
+            evento.preventDefault();
+            evento.returnValue = '';
         }
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // 1. Identificar los elementos
-        const checkAlternativo = document.getElementById('{{ form_general.contacto_alt.id_for_label }}');
-        const divAlternativo = document.getElementById('seccion-alternativo');
+    // =========================
+    // 🟡 FECHA AUTOMÁTICA
+    // =========================
+    const fechaRenovacion = document.getElementById('id_fecha_renovacion');
+    const fechaVencimiento = document.getElementById('id_fecha_vencimiento');
 
-        // 2. Función para alternar visibilidad
+    if (fechaRenovacion && fechaVencimiento) {
+        fechaRenovacion.addEventListener('change', function() {
+            let fechaInicio = new Date(this.value);
+            if (!isNaN(fechaInicio.getTime())) {
+                fechaInicio.setFullYear(fechaInicio.getFullYear() + 1);
+                let fechaFin = fechaInicio.toISOString().split('T')[0];
+                fechaVencimiento.value = fechaFin;
+            }
+        });
+    }
+
+    // =========================
+    // 🟢 CONTACTO ALTERNATIVO
+    // =========================
+    const checkAlternativo = document.getElementById('{{ form_general.contacto_alt.id_for_label }}');
+    const divAlternativo = document.getElementById('seccion-alternativo');
+
+    if (checkAlternativo && divAlternativo) {
         function toggleAlternativo() {
             if (checkAlternativo.checked) {
                 divAlternativo.style.display = 'block';
-                // Animación simple de entrada (opcional)
-                divAlternativo.classList.add('fade-in'); 
+                divAlternativo.classList.add('fade-in');
             } else {
                 divAlternativo.style.display = 'none';
             }
         }
 
-        // 3. Ejecutar al cargar la página (para ediciones o recargas)
         toggleAlternativo();
-
-        // 4. Ejecutar cada vez que el usuario haga clic
         checkAlternativo.addEventListener('change', toggleAlternativo);
+    }
+
+    // =========================
+    // 🟣 CAMPOS MAYÚSCULAS
+    // =========================
+    const camposMayusculas = [
+        'id_nombres_cliente',
+        'id_direccion',
+        'id_observaciones',
+        'id_observacion_alt',
+    ];
+
+    camposMayusculas.forEach(function(id) {
+        const input = document.getElementById(id);
+        if (input) {
+            input.classList.add('uppercase-input');
+
+            input.addEventListener('input', function() {
+                let start = this.selectionStart;
+                let end = this.selectionEnd;
+
+                this.value = this.value.toUpperCase();
+
+                this.setSelectionRange(start, end);
+            });
+        }
     });
 
-    async function consultarBaseExterna() {
+});
+
+
+// =========================
+// 🔵 CONSULTAR BASE EXTERNA
+// =========================
+async function consultarBaseExterna() {
     const btn = document.getElementById('btn-consultar-db');
     const msg = document.getElementById('msg-consulta');
-    
     const inputFacturas = document.getElementById('id_facturas_consumidas'); 
 
     if (!inputFacturas) {
@@ -308,10 +369,11 @@
     }
 
     const servidorSelect = document.getElementById('id_servidor_alojamiento'); 
-    const servidorId = servidorSelect.value; 
-    const nombreBD = document.getElementById('id_nombre_basedatos').value;
-    const fechaRenovacion = document.getElementById('id_fecha_renovacion').value;
-    const fechaVencimiento = document.getElementById('id_fecha_vencimiento').value;
+    const servidorId = servidorSelect ? servidorSelect.value : null;
+
+    const nombreBD = document.getElementById('id_nombre_basedatos')?.value;
+    const fechaRenovacion = document.getElementById('id_fecha_renovacion')?.value;
+    const fechaVencimiento = document.getElementById('id_fecha_vencimiento')?.value;
 
     if (!servidorId || !nombreBD) {
         alert("Faltan datos técnicos (Servidor o BD).");
@@ -357,69 +419,49 @@
         btn.disabled = false;
     }
 }
-document.addEventListener('DOMContentLoaded', function() {
-            const camposMayusculas = [
-            'id_nombres_cliente',
-            'id_direccion',
-            'id_observaciones',
-            'id_observacion_alt',
-        ];
 
-        camposMayusculas.forEach(function(id) {
-            const input = document.getElementById(id);
-            if (input) {
-                input.classList.add('uppercase-input');
-                
-                input.addEventListener('input', function() {
-                    let start = this.selectionStart; 
-                    let end = this.selectionEnd;
-                    
-                    this.value = this.value.toUpperCase();
-                    
-                    this.setSelectionRange(start, end); 
-                });
-            }
-        });
-    });
-    function enviarWhatsAppRecordatorio() {
-        const inputTelefono = document.getElementById('id_telefono_cliente');
-        const inputFechaVenc = document.getElementById('id_fecha_vencimiento');
-        const inputNombre = document.getElementById('id_nombres_cliente');
 
-        let telefono = inputTelefono.value.trim();
-        let fecha = inputFechaVenc.value;
-        let nombre = inputNombre.value;
+// =========================
+// 🟢 WHATSAPP
+// =========================
+function enviarWhatsAppRecordatorio() {
+    const inputTelefono = document.getElementById('id_telefono_cliente');
+    const inputFechaVenc = document.getElementById('id_fecha_vencimiento');
+    const inputNombre = document.getElementById('id_nombres_cliente');
 
-        if (!telefono) {
-            alert("Por favor escribe un número de teléfono primero.");
-            inputTelefono.focus();
-            return;
-        }
-        
-        if (!fecha) {
-            alert("No hay fecha de vencimiento definida en la Sección 2.");
-            return;
-        }
+    let telefono = inputTelefono.value.trim();
+    let fecha = inputFechaVenc.value;
+    let nombre = inputNombre.value;
 
-        telefono = telefono.replace(/[^0-9]/g, '');
+    if (!telefono) {
+        alert("Por favor escribe un número de teléfono primero.");
+        inputTelefono.focus();
+        return;
+    }
 
-        if (telefono.startsWith('09') && telefono.length === 10) {
-            telefono = '593' + telefono.substring(1);
-        } 
-        else if (telefono.startsWith('9') && telefono.length === 9) {
-            telefono = '593' + telefono;
-        }
+    if (!fecha) {
+        alert("No hay fecha de vencimiento definida en la Sección 2.");
+        return;
+    }
 
-        const mensajeTexto = `Estimado/a *${nombre}*, reciba un cordial saludo de *Corporación Menatics.*
+    telefono = telefono.replace(/[^0-9]/g, '');
+
+    if (telefono.startsWith('09') && telefono.length === 10) {
+        telefono = '593' + telefono.substring(1);
+    } 
+    else if (telefono.startsWith('9') && telefono.length === 9) {
+        telefono = '593' + telefono;
+    }
+
+    const mensajeTexto = `Estimado/a *${nombre}*, reciba un cordial saludo de *Corporación Menatics.*
 El motivo del mensaje es para informarle que su servicio de facturación electrónica presenta un próximo vencimiento el día *${fecha}.* Para garantizar que su emisión de comprobantes y ventas no se vean interrumpidas, le invitamos a gestionar su renovación a la brevedad.
 Quedamos a su disposición para asistirle en el proceso y asegurar la continuidad de su negocio.`;
-        
-        const mensajeCodificado = encodeURIComponent(mensajeTexto);
 
-        // 5. Abrir WhatsApp Web
-        const url = `https://wa.me/${telefono}?text=${mensajeCodificado}`;
-        window.open(url, '_blank');
-    }
+    const mensajeCodificado = encodeURIComponent(mensajeTexto);
+
+    const url = `https://wa.me/${telefono}?text=${mensajeCodificado}`;
+    window.open(url, '_blank');
+}
 </script>
 
 <style>

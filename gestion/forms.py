@@ -140,7 +140,6 @@ class TecnicoForm(EstiloFormMixin, forms.ModelForm):
         widgets = {
             'nombre_basedatos': forms.TextInput(attrs={'placeholder': 'Ej: MenaticsCorp'}),
             'url_portal': forms.TextInput(attrs={'placeholder': 'Ej: 186.4.213.205:8101'}),
-            'clave_portal': forms.TextInput(attrs={'class': 'text-uppercase'}),
             'firma': forms.TextInput(attrs={'placeholder': 'Ej: firmaelectronica32'}),
             'email_tecnico': forms.TextInput(attrs={'placeholder': 'Ej: facturas@gmail.com'}),
             'clave_email': forms.TextInput(attrs={'placeholder': 'Ej: micontraseña'}),

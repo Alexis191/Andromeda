@@ -1,6 +1,7 @@
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from . import views
+#import debug_toolbar
 
 urlpatterns = [
     # RUTA PRINCIPAL (DASHBOARD)
@@ -56,4 +57,6 @@ urlpatterns = [
     path('reportes/', views.panel_reportes, name='panel_reportes'),
     path('reportes/exportar/ventas/', views.reporte_ventas_excel, name='exportar_ventas'),
     path('reportes/exportar/no-renovacion/', views.reporte_no_renovacion_excel, name='exportar_no_renovacion'),
+
+    #path('__debug__/', include(debug_toolbar.urls)),
 ]

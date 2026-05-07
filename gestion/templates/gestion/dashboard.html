@@ -201,7 +201,7 @@
                     p.style.borderBottom = "1px solid #eee";
                     
                     if (datoCliente.status === 'ok') {
-                        p.innerHTML = `<i class="fas fa-check text-success me-2"></i><strong>${datoCliente.cliente}</strong>: ${datoCliente.cantidad} docs`;
+                        p.innerHTML = `<i class="fas fa-check text-success me-2"></i><strong>${datoCliente.cliente}</strong>: ${datoCliente.cantidad}/${datoCliente.plan} facturas.`;
                     } 
                     else if (datoCliente.status === 'omitido') {
                         // Muestra el cliente saltado en color gris

@@ -7,7 +7,6 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .services import conectar_y_contar_facturas, verificar_alertas_plan
-from django.db.models import F
 from django.http import HttpResponse
 
 # Django contrib
@@ -15,13 +14,26 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 
 # Models y forms locales
-from .models import *
-from .forms import *
-from .services import conectar_y_contar_facturas
+from .models import (
+    DatosGeneralesCliente, 
+    EstadoCliente, 
+    DatosProducto,
+    DatosProveedor,
+    DatosServicio,
+    DatosTecnicosCliente,
+    ServidorBaseDatos
+)
+from .forms import (
+    ClienteForm,
+    ServicioForm,
+    TecnicoForm,
+    PerfilUsuarioForm,
+    AdminUsuarioForm,
+    CargaMasivaForm
+)
 
 # Utils y otras bibliotecas
 import json
-import pyodbc
 import openpyxl
 from django.db import IntegrityError
 from datetime import datetime
@@ -338,7 +350,7 @@ def eliminar_producto(request, id):
         producto = get_object_or_404(DatosProducto, pk=id)
         producto.delete()
         messages.warning(request, 'Producto eliminado.')
-    except Exception as e:
+    except Exception:
         messages.error(request, 'Error al eliminar.')
     return redirect('lista_productos')
 
@@ -394,7 +406,7 @@ def eliminar_proveedor(request, id):
         prov = get_object_or_404(DatosProveedor, pk=id)
         prov.delete()
         messages.warning(request, 'Proveedor eliminado.')
-    except Exception as e:
+    except Exception:
         messages.error(request, 'Error al eliminar.')
     return redirect('lista_proveedores')
 
@@ -482,7 +494,8 @@ def carga_masiva_clientes(request):
             errores = []
 
             for i, fila in enumerate(hoja.iter_rows(min_row=2, values_only=True), start=2):
-                if not any(fila): continue 
+                if not any(fila): 
+                    continue 
 
                 (
                     nom, ruc, tel, mail, id_prov, id_est, id_reg, act, env_m, obs_gen,
@@ -599,12 +612,13 @@ def api_sincronizar_cliente(request, id_cliente):
         cliente = DatosGeneralesCliente.objects.get(pk=id_cliente)
         
         srv = cliente.datos_tecnicos.servidor_alojamiento
-        if srv.id == 6 or (cliente.estado and cliente.estado.id == 3):
-            motivo = "Localhost" if srv.id == 6 else "No Renovado"
+        if srv.id == 5 or (cliente.estado and cliente.estado.id == 3):
+            motivo = "Localhost" if srv.id == 5 else "No Renovado"
             return JsonResponse({
                 'status': 'omitido', 
                 'cliente': cliente.nombres_cliente, 
-                'mensaje': motivo
+                'mensaje': motivo,
+                'plan': cliente.servicio.producto.plan_num
             })
         db = cliente.datos_tecnicos.nombre_basedatos
         f_ini = cliente.servicio.fecha_renovacion.strftime('%d/%m/%Y')
@@ -624,13 +638,15 @@ def api_sincronizar_cliente(request, id_cliente):
             return JsonResponse({
                 'status': 'ok', 
                 'cliente': cliente.nombres_cliente, 
-                'cantidad': cantidad
+                'cantidad': cantidad,
+                'plan': cliente.servicio.producto.plan_num
             })
         else:
             return JsonResponse({
                 'status': 'error', 
                 'cliente': cliente.nombres_cliente, 
-                'mensaje': 'Error de conexión'
+                'mensaje': 'Error de conexión',
+                'plan': cliente.servicio.producto.plan_num
             })
 
     except Exception as e:

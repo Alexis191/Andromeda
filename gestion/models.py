@@ -59,6 +59,9 @@ class DatosServicio(models.Model):
     # Consumo de facturas electrónicas
     facturas_consumidas = models.IntegerField(default=0, help_text="Actualizado automáticamente desde BD externa")
 
+    #Marcador para evitar el envío duplicado de correos de vencimiento a clientes
+    alerta_vencimiento_enviada = models.BooleanField(default=False, help_text="Se marca al enviar aviso de 15 días del vencimiento")
+
     # Otros campos
     precio_pactado = models.DecimalField(max_digits=10, decimal_places=2)
     observaciones = models.TextField(null=True, blank=True)
@@ -69,9 +72,18 @@ class DatosServicio(models.Model):
     mod_tesoreria = models.BooleanField(default=False, verbose_name="Tesoreria (C x P/C)")
     mod_inventario = models.BooleanField(default=False, verbose_name="Inventario (Kardex)")
 
+    def save(self, *args, **kwargs):
+            if self.pk:
+                try:
+                    antiguo_registro = DatosServicio.objects.get(pk=self.pk) 
+                    if antiguo_registro.fecha_vencimiento != self.fecha_vencimiento:
+                        self.alerta_vencimiento_enviada = False
+                except DatosServicio.DoesNotExist:
+                    pass 
+            super(DatosServicio, self).save(*args, **kwargs)
     def __str__(self):
         return f"Servicio {self.id} - Plan: {self.producto.nombre_producto}"
-
+    
 # TABLA PARA LOS DATOS GENERALES DEL CLIENTE
 class DatosGeneralesCliente(models.Model):
     # Relaciones

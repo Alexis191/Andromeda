@@ -2,10 +2,14 @@ import logging
 import sys
 import os
 import traceback
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 from django.conf import settings
 from .models import DatosGeneralesCliente, EstadoCliente
-from .services import *
+from .services import (
+    verificar_alertas_plan,
+    verificar_vencimiento_15_dias,
+    conectar_y_contar_facturas,
+)
 from django.core.mail import send_mail
 
 class StreamToLogger(object):
@@ -34,7 +38,7 @@ def enviar_alerta_consumo_unificada(alertas_consumo):
 
     try:
         send_mail(
-            subject="⚠️ [ALERTA DE CONSUMO] Reporte Unificado de Consumo de Clientes",
+            subject="[ALERTA DE CONSUMO] Reporte Unificado de Consumo de Clientes",
             message=mensaje_cuerpo,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=settings.OPERATIONS_EMAIL,
@@ -78,7 +82,6 @@ def tarea_monitoreo_diario():
     logger.info(f"INICIO EJECUCIÓN TAREA: {datetime.now()}")
     logger.info("="*50)
 
-    errores_detectados = []
 
     try:
         print(f"--- Ejecutando Monitoreo de Estados: {date.today()} ---")
@@ -119,8 +122,14 @@ def tarea_monitoreo_diario():
                 srv = cliente.datos_tecnicos.servidor_alojamiento
                 db = cliente.datos_tecnicos.nombre_basedatos
 
-                if srv.id == 5 or cliente.estado.id == 3:
-                    motivo = "Servidor Localhost" if srv.id == 5 else "Estado NO RENOVADO"
+                if srv.id == 5 or cliente.estado.id in [3, 5]:
+                    if srv.id == 5:
+                        motivo = "Servidor Localhost"
+                    elif cliente.estado.id == 3:
+                        motivo = "Estado NO RENOVADO"
+                    elif cliente.estado.id == 5:
+                        motivo = "Estado BLOQUEADO"
+                        
                     print(f"[OMITIDO] {cliente.nombres_cliente}: Se salta el monitoreo por {motivo}.")
                     continue
 
@@ -142,7 +151,7 @@ def tarea_monitoreo_diario():
                         if alerta:
                             alertas_consumo.append(alerta)
                         
-                        print(f"[OK] {cliente.nombres_cliente}: {consumo} facturas.")
+                        print(f"[OK] {cliente.nombres_cliente}: {consumo} facturas de {cliente.servicio.producto.plan_num}.")
                         exitos += 1
                     else:
                         msg = f"[ERROR SQL] {cliente.nombres_cliente} en {srv.ip_host} ({db})"

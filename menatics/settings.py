@@ -10,10 +10,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.100.9', '127.0.0.1', 'localhost']
 
+INTERNAL_IPS = [
+    '127.0.0.1',
+    'localhost',
+]
 
 # Application definition
 
@@ -25,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'gestion',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -35,6 +40,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'menatics.urls'
@@ -59,11 +65,11 @@ WSGI_APPLICATION = 'menatics.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql', 
-        'NAME': 'Andromeda',
+        'NAME': 'AndromedaPruebas',
         'USER': 'sa',           
-        'PASSWORD': '123',    
-        'HOST': 'localhost\INFORMATICS',              
-        'PORT': '',                       
+        'PASSWORD': os.getenv('DB_PASSWORD'),    
+        'HOST': os.getenv('HOST'),             
+        'PORT': '8083',                       
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server', 
         },
@@ -102,6 +108,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -124,18 +131,18 @@ LOGOUT_REDIRECT_URL = 'login'
 #SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.pro-smtp.com'
-EMAIL_PORT = 25
-EMAIL_HOST_USER = 'ventas@menaticscorp.com.ec'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-DEFAULT_FROM_EMAIL = 'Sistema Menatics <ventas@menaticscorp.com.ec>'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
 # Correo del personal operativo que recibirá las alertas
 OPERATIONS_EMAIL = [
-    'communitymanager@menaticscorp.com.ec',
     'operacionesmarketing@menaticscorp.com.ec',
+    'communitymanager@menaticscorp.com.ec',
     #'compañero3@menaticscorp.com.ec',
 ]
 
